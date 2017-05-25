@@ -1,6 +1,8 @@
 # l5r-discord-bot
 A bot for the [L5R Discord](https://discord.gg/zPvBePb).
 
+Add it to your server [here](https://discordapp.com/oauth2/authorize?client_id=317200299846664192&scope=bot&permissions=268635136).
+
 It can apply default roles to new members, roll dice (for the L5R 4e RPG) and allow users to join and leave roles on the server.
 
 The syntax is as follows:
