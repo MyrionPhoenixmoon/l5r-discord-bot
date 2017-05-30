@@ -91,8 +91,8 @@ async def on_message(message):
                     "\n" + \
                     "!help informs you about what he may do.  \n" + \
                     "\n" + \
-                    "!clan <rolename> lets you swear allegiance to or leave a given clan. \n " + \
-                    "!clan <rolename> default lets the admins set default roles that to apply to new members. \n \n" + \
+                    "!clan <rolename> lets you swear allegiance to or leave a given clan. \n" + \
+                    "!clan <rolename> default lets the admins set default roles that to apply to new members. \n" + \
                     "!clan <rolename> hidden lets the admins hide roles from the output. \n \n" + \
                     "!clans tells you how many people are in each clan. \n \n" + \
                     "!roll is used to roll dice. \n" + \
@@ -176,13 +176,13 @@ async def on_message(message):
                                           'ask for !help first.')
     if message.content.startswith('!clans'):
         roles = role_numbers_per_server[message.server.name]
-        response = "``` \n"
-        roles_generator = (role, count for role, count in roles.items if role not in hidden_roles)
+        response = "```"
+        roles_generator = ((role, count) for (role, count) in roles.items() if role not in hidden_roles)
         for role, count in roles_generator:
             response += role + ": " + str(count) + "\n"
         response += "``` \n"
         await client.send_message(message.channel, response)
-        update_server_stats()
+        await update_server_stats()
     if message.content.startswith('!roll'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
