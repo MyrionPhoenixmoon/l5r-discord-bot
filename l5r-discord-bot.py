@@ -179,7 +179,7 @@ async def on_message(message):
         try:
             hidden_roles[message.server.name]
         except KeyError:
-            hidden_roles[message.server.name]: []
+            hidden_roles[message.server.name] = []
         response = "```"
         for role, count in roles.items():
             if role not in hidden_roles[message.server.name]:
