@@ -176,6 +176,10 @@ async def on_message(message):
                                           'ask for !help first.')
     if message.content.startswith('!clans'):
         roles = role_numbers_per_server[message.server.name]
+        try:
+            hidden_roles[message.server.name]
+        except KeyError:
+            hidden_roles[message.server.name]: []
         response = "```"
         for role, count in roles.items():
             if role not in hidden_roles[message.server.name]:
