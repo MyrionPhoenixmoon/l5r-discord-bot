@@ -37,7 +37,6 @@ async def save_stats_to_file():
         json.dump(role_numbers_per_server, outfile)
         logger.info('Saved new role stats to file')
 
-
 async def save_default_roles_to_file():
     with open('default_roles.json', 'w') as outfile:
         json.dump(default_roles, outfile)
@@ -47,6 +46,7 @@ async def save_hidden_roles_to_file():
     with open('hidden_roles.json', 'w') as outfile:
         json.dump(hidden_roles, outfile)
         logger.info('Saved hidden roles to file')
+
 
 async def update_server_stats():
     for server in client.servers:
@@ -177,9 +177,9 @@ async def on_message(message):
     if message.content.startswith('!clans'):
         roles = role_numbers_per_server[message.server.name]
         response = "```"
-        roles_generator = ((role, count) for (role, count) in roles.items() if role not in hidden_roles)
-        for role, count in roles_generator:
-            response += role + ": " + str(count) + "\n"
+        for role, count in roles.items():
+            if role not in hidden_roles[message.server.name]:
+                response += role + ": " + str(count) + "\n"
         response += "``` \n"
         await client.send_message(message.channel, response)
         await update_server_stats()
