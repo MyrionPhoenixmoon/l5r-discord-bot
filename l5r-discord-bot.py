@@ -25,6 +25,11 @@ with open('default_roles.json', 'w+') as json_data:
         default_roles = json.load(json_data)
     except json.decoder.JSONDecodeError:
         default_roles = {}
+with open('hidden_roles.json', 'w+') as json_data:
+    try:
+        hidden_roles = json.load(json_data)
+    except json.decoder.JSONDecodeError:
+        hidden_roles = {}
 
 
 async def save_stats_to_file():
@@ -32,11 +37,24 @@ async def save_stats_to_file():
         json.dump(role_numbers_per_server, outfile)
         logger.info('Saved new role stats to file')
 
+
 async def save_default_roles_to_file():
     with open('default_roles.json', 'w') as outfile:
-        json.dump(role_numbers_per_server, outfile)
+        json.dump(default_roles, outfile)
         logger.info('Saved default roles to file')
 
+async def save_hidden_roles_to_file():
+    with open('hidden_roles.json', 'w') as outfile:
+        json.dump(hidden_roles, outfile)
+        logger.info('Saved hidden roles to file')
+
+async def update_server_stats():
+    for server in client.servers:
+        stats = collections.Counter()
+        for member in server.members:
+            roles = [role.name for role in member.roles if role.name != '@everyone']
+            stats.update(roles)
+        role_numbers_per_server[server.name] = stats
 
 @client.event
 async def on_ready():
@@ -46,12 +64,7 @@ async def on_ready():
     logger.info('------')
 
     logger.info('Updating role statistics')
-    for server in client.servers:
-        stats = collections.Counter()
-        for member in server.members:
-            roles = [role.name for role in member.roles if role.name != '@everyone']
-            stats.update(roles)
-        role_numbers_per_server[server.name] = stats
+    await update_server_stats()
     await save_stats_to_file()
 
 
@@ -80,6 +93,7 @@ async def on_message(message):
                     "\n" + \
                     "!clan <rolename> lets you swear allegiance to or leave a given clan. \n " + \
                     "!clan <rolename> default lets the admins set default roles that to apply to new members. \n \n" + \
+                    "!clan <rolename> hidden lets the admins hide roles from the output. \n \n" + \
                     "!clans tells you how many people are in each clan. \n \n" + \
                     "!roll is used to roll dice. \n" + \
                     "[] denotes optional elements, {} denotes 'pick one'. show_dice shows the individual dice " + \
@@ -96,32 +110,36 @@ async def on_message(message):
         command = message.content.split(' ')[1:]
         if len(command) == 1:
             logger.info(message.author.name + ' wants to join or leave a clan!')
+            logger.info('That clan is ' + command[0])
             role = discord.utils.find(lambda r: r.name == command[0], message.server.roles)
             if role is not None and role not in message.author.roles:
                 try:
                     await client.add_roles(message.author, role)
                     role_numbers_per_server[message.server.name][role.name] += 1
                     await client.send_message(message.channel, 'Let it be known that ' + message.author.mention +
-                                          ' joined the ' + role.name + ' clan!')
+                                              ' joined the ' + role.name + ' clan!')
                 except discord.errors.Forbidden:
+                    logger.info("Got a FORBIDDEN error while adding to the clan")
                     await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
-                                                               "join! *AKA you're not permitted to join this role*")
+                                              "join! *AKA you're not permitted to join this role or I'm not allowed " +
+                                              "to give it to you*")
             elif role is not None and role in message.author.roles:
                 await client.remove_roles(message.author, role)
                 role_numbers_per_server[message.server.name][role.name] -= 1
                 if role_numbers_per_server[message.server.name][role.name] == 0:
-                    del(role_numbers_per_server[message.server.name][role.name])
+                    del (role_numbers_per_server[message.server.name][role.name])
                 await client.send_message(message.channel, 'Let it be known that ' + message.author.mention +
                                           ' left the ' + role.name + ' clan!')
             else:
+                logger.info("The clan doesn't exist")
                 await client.send_message(message.channel, 'Unfortunately, ' + message.author.mention +
                                           '-san, this clan is not listed in the Imperial Records...')
         elif len(command) == 2:
             if not message.author.server_permissions.manage_server:
-                logger.warning(message.author.name + ' try to set default roles without permission!')
-                await client.send_message(message.channel, 'You do not have permission to modify the default roles.')
+                logger.warning(message.author.name + ' try to set default or roles without permission!')
+                await client.send_message(message.channel, 'You do not have permission to modify the default or hidden roles.')
                 return None
-            logger.info(message.author.name + ' wants to manage default roles.')
+            logger.info(message.author.name + ' wants to manage default or hidden roles.')
             if command[1] == 'default':
                 role = discord.utils.find(lambda r: r.name == command[0], message.server.roles)
                 try:
@@ -137,15 +155,34 @@ async def on_message(message):
                     default_roles[message.server.name].append(role.name)
                     await save_default_roles_to_file()
                     await client.send_message(message.channel, role.name + ' has been added to the default roles list.')
+            if command[1] == 'hidden':
+                role = discord.utils.find(lambda r: r.name == command[0], message.server.roles)
+                try:
+                    hidden_roles[message.server.name]
+                except KeyError:
+                    hidden_roles[message.server.name] = []
+                if role.name in hidden_roles[message.server.name]:
+                    hidden_roles[message.server.name].remove(role.name)
+                    await save_hidden_roles_to_file()
+                    await client.send_message(message.channel, role.name +
+                                              ' has been removed from the hidden roles list.')
+                else:
+                    hidden_roles[message.server.name].append(role.name)
+                    await save_hidden_roles_to_file()
+                    await client.send_message(message.channel,
+                                              role.name + ' has been added to the hidden roles list.')
             else:
                 await client.send_message(message.channel, 'That is not a request I can fulfill. Perhaps you should ' +
-                                                           'ask for !help first.')
+                                          'ask for !help first.')
     if message.content.startswith('!clans'):
         roles = role_numbers_per_server[message.server.name]
-        response = ""
-        for role, count in roles.items():
+        response = "``` \n"
+        roles_generator = (role, count for role, count in roles.items if role not in hidden_roles)
+        for role, count in roles_generator:
             response += role + ": " + str(count) + "\n"
+        response += "``` \n"
         await client.send_message(message.channel, response)
+        update_server_stats()
     if message.content.startswith('!roll'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
