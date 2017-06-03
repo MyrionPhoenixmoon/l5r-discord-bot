@@ -55,6 +55,28 @@ async def update_server_stats():
             roles = [role.name for role in member.roles if role.name != '@everyone']
             stats.update(roles)
         role_numbers_per_server[server.name] = stats
+        await save_stats_to_file()
+
+async def reload_from_files():
+    nonlocal role_numbers_per_server
+    nonlocal default_roles
+    nonlocal hidden_roles
+    with open('role_numbers.json', 'w+') as json_data:
+        try:
+            role_numbers_per_server = json.load(json_data)
+        except json.decoder.JSONDecodeError:
+            role_numbers_per_server = {}
+    with open('default_roles.json', 'w+') as json_data:
+        try:
+            default_roles = json.load(json_data)
+        except json.decoder.JSONDecodeError:
+            default_roles = {}
+    with open('hidden_roles.json', 'w+') as json_data:
+        try:
+            hidden_roles = json.load(json_data)
+        except json.decoder.JSONDecodeError:
+            hidden_roles = {}
+
 
 @client.event
 async def on_ready():
@@ -176,6 +198,7 @@ async def on_message(message):
                                           'ask for !help first.')
     if message.content.startswith('!clans'):
         roles = role_numbers_per_server[message.server.name]
+        logger.info("Displaying clan numbers")
         try:
             hidden_roles[message.server.name]
         except KeyError:
@@ -201,6 +224,8 @@ async def on_message(message):
             await client.send_message(message.channel,
                                       "Sorry, samurai-san, I didn't understand your request. \n"
                                       "!help should be informative for you.")
+    if message.content.startswith('!reload'):
+        await reload_from_files()
 
 
 client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAgYmg.L9GPRhrc9HbaFEv2tyS5aG54FOY')
