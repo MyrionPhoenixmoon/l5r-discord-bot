@@ -44,6 +44,7 @@ def roll_and_keep(command):
             die_value += die_roll
         dice.append(die_value)
     dice.sort(reverse=True)
+    dice_to_show = dice
     dice = dice[:kept]
     result = sum(dice) + modifier
 
@@ -56,6 +57,6 @@ def roll_and_keep(command):
             if result < target:
                 message = "**You failed** by " + str(target - result) + "! \n"
     if show_dice:
-        message += "Your dice were " + str(dice)
+        message += "Your dice were " + str(dice_to_show)
 
     return max(result, 0), message
