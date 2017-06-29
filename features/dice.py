@@ -57,6 +57,6 @@ def roll_and_keep(command):
             if result < target:
                 message = "**You failed** by " + str(target - result) + "! \n"
     if show_dice:
-        message += "Your dice were " + str(dice_to_show)
+        message += "Your dice were " + str(dice_to_show) + " and I kept " + str(dice)
 
     return max(result, 0), message
