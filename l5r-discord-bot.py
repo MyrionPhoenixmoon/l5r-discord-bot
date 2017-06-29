@@ -4,6 +4,7 @@ import json
 import collections
 
 import features.dice as dice
+import features.cards as cards
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
@@ -224,6 +225,12 @@ async def on_message(message):
             await client.send_message(message.channel,
                                       "Sorry, samurai-san, I didn't understand your request. \n"
                                       "!help should be informative for you.")
+    if message.content.startswith('!card'):
+        command = message.content.split(' ')[1:]
+        if len(command) < 1:
+            await client.send_message(message.channel, "I can look cards up for you, honourable samurai-san.")
+        else:
+            await client.send_message(message.channel, cards.get_card_url(command))
     if message.content.startswith('!reload'):
         await reload_from_files()
 
