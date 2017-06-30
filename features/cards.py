@@ -1,9 +1,12 @@
+import urllib
+
 
 def get_card_url(command):
 
     card_name = ''
 
     for string in command:
+        string = urllib.parse.unquote(string)
         string.replace("'", "-")
         if card_name != '':
             card_name += '-'
