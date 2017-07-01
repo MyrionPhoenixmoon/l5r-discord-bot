@@ -16,6 +16,8 @@ def roll_and_keep(command):
     for parameter in command:
         if parameter.startswith('+') or parameter.startswith('-'):
             modifier = int(parameter[1:])
+            if parameter[0] == '-':
+                modifier *= -1
         if parameter.startswith('TN'):
             target = int(parameter[2:])
         if not unskilled and (parameter == "unskilled" or parameter == "Unskilled"):
