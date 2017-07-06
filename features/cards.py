@@ -7,7 +7,7 @@ def get_card_url(command):
 
     for string in command:
         string = urllib.parse.unquote(string)
-        string.replace("'", "-")
+        string = string.replace("'", "-")
         if card_name != '':
             card_name += '-'
         card_name += string.lower()
