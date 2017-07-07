@@ -16,17 +16,17 @@ client = discord.Client()
 
 role_numbers_per_server = {}
 
-with open('role_numbers.json', 'w+') as json_data:
+with open('role_numbers.json', 'r') as json_data:
     try:
         role_numbers_per_server = json.load(json_data)
     except json.decoder.JSONDecodeError:
         role_numbers_per_server = {}
-with open('default_roles.json', 'w+') as json_data:
+with open('default_roles.json', 'r') as json_data:
     try:
         default_roles = json.load(json_data)
     except json.decoder.JSONDecodeError:
         default_roles = {}
-with open('hidden_roles.json', 'w+') as json_data:
+with open('hidden_roles.json', 'r') as json_data:
     try:
         hidden_roles = json.load(json_data)
     except json.decoder.JSONDecodeError:
@@ -59,20 +59,20 @@ async def update_server_stats():
         await save_stats_to_file()
 
 async def reload_from_files():
-    nonlocal role_numbers_per_server
-    nonlocal default_roles
-    nonlocal hidden_roles
-    with open('role_numbers.json', 'w+') as json_data:
+    global role_numbers_per_server
+    global default_roles
+    global hidden_roles
+    with open('role_numbers.json', 'r') as json_data:
         try:
             role_numbers_per_server = json.load(json_data)
         except json.decoder.JSONDecodeError:
             role_numbers_per_server = {}
-    with open('default_roles.json', 'w+') as json_data:
+    with open('default_roles.json', 'r') as json_data:
         try:
             default_roles = json.load(json_data)
         except json.decoder.JSONDecodeError:
             default_roles = {}
-    with open('hidden_roles.json', 'w+') as json_data:
+    with open('hidden_roles.json', 'r') as json_data:
         try:
             hidden_roles = json.load(json_data)
         except json.decoder.JSONDecodeError:
