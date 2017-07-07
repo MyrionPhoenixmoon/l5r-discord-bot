@@ -59,9 +59,9 @@ async def update_server_stats():
         await save_stats_to_file()
 
 async def reload_from_files():
-    nonlocal role_numbers_per_server
-    nonlocal default_roles
-    nonlocal hidden_roles
+    global role_numbers_per_server
+    global default_roles
+    global hidden_roles
     with open('role_numbers.json', 'w+') as json_data:
         try:
             role_numbers_per_server = json.load(json_data)
@@ -118,6 +118,7 @@ async def on_message(message):
                     "!clan <rolename> default lets the admins set default roles that to apply to new members. \n" + \
                     "!clan <rolename> hidden lets the admins hide roles from the output. \n \n" + \
                     "!clans tells you how many people are in each clan. \n \n" + \
+                    "!card <cardname> looks up cards on https://fiveringsdb.com \n \n" +\
                     "!roll is used to roll dice. \n" + \
                     "[] denotes optional elements, {} denotes 'pick one'. show_dice shows the individual dice " + \
                     "results. \n " + \
@@ -228,11 +229,11 @@ async def on_message(message):
     if message.content.startswith('!card'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
-            await client.send_message(message.channel, "I can look cards up for you, honourable samurai-san.")
+            await client.send_message(message.channel, "I can look cards up for you, honourable samurai-san, but please tell me which one.")
         else:
             await client.send_message(message.channel, cards.get_card_url(command))
     if message.content.startswith('!reload'):
         await reload_from_files()
 
 
-client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAgYmg.L9GPRhrc9HbaFEv2tyS5aG54FOY')
+client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAhMEw.XLJChLDmEkr1i2hXw1YWouzJVpw')
