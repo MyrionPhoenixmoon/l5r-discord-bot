@@ -5,6 +5,7 @@ import collections
 
 import features.dice as dice
 import features.cards as cards
+import features.oracle as oracle
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
@@ -119,6 +120,7 @@ async def on_message(message):
                     "!clan <rolename> hidden lets the admins hide roles from the output. \n \n" + \
                     "!clans tells you how many people are in each clan. \n \n" + \
                     "!card <cardname> looks up cards on https://fiveringsdb.com \n \n" +\
+                    "!oracle <cardname> looks up old5r cards on http://l5rdb.net/ \n \n" +\
                     "!roll is used to roll dice. \n" + \
                     "[] denotes optional elements, {} denotes 'pick one'. show_dice shows the individual dice " + \
                     "results. \n " + \
@@ -232,6 +234,12 @@ async def on_message(message):
             await client.send_message(message.channel, "I can look cards up for you, honourable samurai-san, but please tell me which one.")
         else:
             await client.send_message(message.channel, cards.get_card_url(command))
+    if message.content.startswith('!oracle'):
+        command = message.content.split(' ')[1:]
+        if len(command) < 1:
+            await client.send_message(message.channel, "I can look Old5r cards up for you, honourable samurai-san.")
+        else:
+            await client.send_message(message.channel, oracle.get_card_url(command))
     if message.content.startswith('!reload'):
         await reload_from_files()
 
