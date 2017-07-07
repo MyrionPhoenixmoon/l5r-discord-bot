@@ -118,6 +118,7 @@ async def on_message(message):
                     "!clan <rolename> default lets the admins set default roles that to apply to new members. \n" + \
                     "!clan <rolename> hidden lets the admins hide roles from the output. \n \n" + \
                     "!clans tells you how many people are in each clan. \n \n" + \
+                    "!card <cardname> looks up cards on https://fiveringsdb.com \n \n" +\
                     "!roll is used to roll dice. \n" + \
                     "[] denotes optional elements, {} denotes 'pick one'. show_dice shows the individual dice " + \
                     "results. \n " + \
@@ -228,7 +229,7 @@ async def on_message(message):
     if message.content.startswith('!card'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
-            await client.send_message(message.channel, "I can look cards up for you, honourable samurai-san.")
+            await client.send_message(message.channel, "I can look cards up for you, honourable samurai-san, but please tell me which one.")
         else:
             await client.send_message(message.channel, cards.get_card_url(command))
     if message.content.startswith('!reload'):

@@ -49,6 +49,8 @@ def roll_and_keep(command):
     dice_to_show = dice
     dice = dice[:kept]
     result = sum(dice) + modifier
+    if result < 0:
+        result = 0
 
     if target != 0:
         if result == target:
