@@ -120,6 +120,7 @@ async def on_message(message):
                     "!clan <rolename> hidden lets the admins hide roles from the output. \n \n" + \
                     "!clans tells you how many people are in each clan. \n \n" + \
                     "!card <cardname> looks up cards on https://fiveringsdb.com \n \n" +\
+                    "!oracle <cardname> looks up old5r cards on http://l5rdb.net/ \n \n" +\
                     "!roll is used to roll dice. \n" + \
                     "[] denotes optional elements, {} denotes 'pick one'. show_dice shows the individual dice " + \
                     "results. \n " + \
