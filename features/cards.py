@@ -43,7 +43,7 @@ def validate_card_name(card_name):
             db_records = {}
 
     if db_records == {} or datetime.datetime.strptime(db_records['last_updated'], "%Y-%m-%dT%H:%M:%S").day < datetime.datetime.utcnow().day:
-        r = requests.get("https://fiveringsdb.com/api/v1/cards")
+        r = requests.get("https://fiveringsdb.com/cards")
         request_data = r.json()
 
         db_records['last_updated'] = request_data['last_updated'][:-6]
