@@ -144,6 +144,8 @@ async def on_message(message):
                     role_numbers_per_server[message.server.name][role.name] += 1
                     await client.send_message(message.channel, 'Let it be known that ' + message.author.mention +
                                               ' joined the ' + role.name + ' clan!')
+                    if (role.name == "Crab"):
+                        await client.send_message(message.channel, '**CRAAAAAAAAB!**')
                 except discord.errors.Forbidden:
                     logger.info("Got a FORBIDDEN error while adding to the clan")
                     await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
