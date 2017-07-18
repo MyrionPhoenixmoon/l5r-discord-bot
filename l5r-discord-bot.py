@@ -242,6 +242,12 @@ async def on_message(message):
             await client.send_message(message.channel, "I can look Old5r cards up for you, honourable samurai-san.")
         else:
             await client.send_message(message.channel, oracle.get_card_url(command))
+    if message.content.startswith('!gencon'):
+        command = message.content.split(' ')[1:]
+        if len(command) < 1:
+            await client.send_message(message.channel, "Say '!gencon days' to get the number of days till gencon!")
+        else:
+            await client.send_message(message.channel, gencon.do_gencon(command))
     if message.content.startswith('!reload'):
         await reload_from_files()
 
