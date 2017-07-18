@@ -6,6 +6,7 @@ import collections
 import features.dice as dice
 import features.cards as cards
 import features.oracle as oracle
+import features.gencon as gencon
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
