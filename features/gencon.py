@@ -30,7 +30,7 @@ def do_gencon(command):
             elif command[0] == "hours":
                 return "approximately %s hours till gencon!" % str(days * 24)
             elif command[0] == "minutes":
-                return "approximately %s seconds till gencon!" % str(days * 1440)
+                return "approximately %s minutes till gencon!" % str(days * 1440)
             elif command[0] == "seconds":
                 return "approximately %s seconds till gencon!" % str(days * 86400)
             
