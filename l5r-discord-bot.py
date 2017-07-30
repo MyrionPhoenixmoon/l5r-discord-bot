@@ -252,7 +252,7 @@ async def on_message(message):
     if message.content.startswith('!gencon'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
-            await client.send_message(message.channel, "Say '!gencon days' to get the number of days till gencon!")
+            await client.send_message(message.channel, "Say '!gencon COMMAND'. Valid commands are: days, hours, minutes, seconds, parsecs, links")
         else:
             await client.send_message(message.channel, gencon.do_gencon(command))
     if message.content.startswith('!reload'):
