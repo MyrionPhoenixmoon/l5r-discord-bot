@@ -130,15 +130,21 @@ async def on_message(message):
                     "exploding dice and keeps the highest Y. \n" + \
                     "Unskilled can be set to prevent the dice from exploding, while Emphasis rerolls 1s. \n" + \
                     "Mastery allows the dice to explode on 9s and 10s. \n" + \
-                    "Ex. !roll 6k3 TN20 or !roll 2k2 TN10 unskilled"
+                    "Ex. !roll 6k3 TN20 or !roll 2k2 TN10 unskilled \n \n" + \ \
+                    "!gencon lets you count down the time until Gencon!"
         await client.send_message(message.channel, help_text)
 
     if message.content.startswith('!clan') and message.content != '!clans':
         command = message.content.split(' ')[1:]
         if len(command) == 1:
             logger.info(message.author.name + ' wants to join or leave a clan!')
-            logger.info('That clan is ' + command[0])
-            role = discord.utils.find(lambda r: r.name == command[0], message.server.roles)
+            # All clan roles are nicely capitalized
+            clan_name = command[0].lower().capitalize()
+            logger.info('That clan is ' + clan_name)
+            role = discord.utils.find(lambda r: r.name == clan_name, message.server.roles)
+            if role is None:
+                # lcgplayer and rpgplayer however, aren't, so we must cover that case as well.
+                role = discord.utils.find(lambda r: r.name == clan_name.lower(), message.server.roles)
             if role is not None and role not in message.author.roles:
                 try:
                     await client.add_roles(message.author, role)
