@@ -190,7 +190,7 @@ async def on_message(message):
                                               '-san, this clan is not listed in the Imperial Records...')
         elif len(command) == 2:
             if not message.author.server_permissions.manage_server:
-                logger.warning(message.author.name + ' try to set default or roles without permission!')
+                logger.warning(message.author.name + ' tried to set default, hidden or forbidden roles without permission!')
                 await client.send_message(message.channel, 'You do not have permission to modify the default or hidden roles.')
                 return None
             logger.info(message.author.name + ' wants to manage default or hidden roles.')
