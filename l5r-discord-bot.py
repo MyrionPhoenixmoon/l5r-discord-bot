@@ -225,22 +225,22 @@ async def on_message(message):
                     await save_hidden_roles_to_file()
                     await client.send_message(message.channel,
                                               role.name + ' has been added to the hidden roles list.')
-                if command[1] == 'forbidden':
-                    role = discord.utils.find(lambda r: r.name == command[0], message.server.roles)
-                    try:
-                        forbidden_roles[message.server.name]
-                    except KeyError:
-                        forbidden_roles[message.server.name] = []
-                    if role.name in forbidden_roles[message.server.name]:
-                        forbidden_roles[message.server.name].remove(role.name)
-                        await save_forbidden_roles_to_file()
-                        await client.send_message(message.channel, role.name +
-                                                  ' has been removed from the forbidden roles list.')
-                    else:
-                        forbidden_roles[message.server.name].append(role.name)
-                        await save_forbidden_roles_to_file()
-                        await client.send_message(message.channel,
-                                                  role.name + ' has been added to the forbidden roles list.')
+            if command[1] == 'forbidden':
+                role = discord.utils.find(lambda r: r.name == command[0], message.server.roles)
+                try:
+                    forbidden_roles[message.server.name]
+                except KeyError:
+                    forbidden_roles[message.server.name] = []
+                if role.name in forbidden_roles[message.server.name]:
+                    forbidden_roles[message.server.name].remove(role.name)
+                    await save_forbidden_roles_to_file()
+                    await client.send_message(message.channel, role.name +
+                                              ' has been removed from the forbidden roles list.')
+                else:
+                    forbidden_roles[message.server.name].append(role.name)
+                    await save_forbidden_roles_to_file()
+                    await client.send_message(message.channel,
+                                              role.name + ' has been added to the forbidden roles list.')
             else:
                 await client.send_message(message.channel, 'That is not a request I can fulfill. Perhaps you should ' +
                                           'ask for !help first.')
