@@ -33,6 +33,11 @@ with open('hidden_roles.json', 'r') as json_data:
         hidden_roles = json.load(json_data)
     except json.decoder.JSONDecodeError:
         hidden_roles = {}
+with open('forbidden_roles.json', 'r') as json_data:
+    try:
+        forbidden_roles = json.load(json_data)
+    except json.decoder.JSONDecodeError:
+        forbidden_roles = {}
 
 
 async def save_stats_to_file():
@@ -49,6 +54,11 @@ async def save_hidden_roles_to_file():
     with open('hidden_roles.json', 'w') as outfile:
         json.dump(hidden_roles, outfile)
         logger.info('Saved hidden roles to file')
+
+async def save_forbidden_roles_to_file():
+    with open('forbidden_roles.json', 'w') as outfile:
+        json.dump(forbidden_roles, outfile)
+        logger.info('Saved forbidden roles to file')
 
 
 async def update_server_stats():
@@ -79,6 +89,11 @@ async def reload_from_files():
             hidden_roles = json.load(json_data)
         except json.decoder.JSONDecodeError:
             hidden_roles = {}
+    with open('forbidden_roles.json', 'r') as json_data:
+        try:
+            forbidden_roles = json.load(json_data)
+        except json.decoder.JSONDecodeError:
+            forbidden_roles = {}
 
 
 @client.event
@@ -140,35 +155,39 @@ async def on_message(message):
             logger.info(message.author.name + ' wants to join or leave a clan!')
             # All clan roles are nicely capitalized
             clan_name = command[0].lower().capitalize()
-            logger.info('That clan is ' + clan_name)
-            role = discord.utils.find(lambda r: r.name == clan_name, message.server.roles)
-            if role is None:
-                # lcgplayer and rpgplayer however, aren't, so we must cover that case as well.
-                role = discord.utils.find(lambda r: r.name == clan_name.lower(), message.server.roles)
-            if role is not None and role not in message.author.roles:
-                try:
-                    await client.add_roles(message.author, role)
-                    role_numbers_per_server[message.server.name][role.name] += 1
-                    await client.send_message(message.channel, 'Let it be known that ' + message.author.mention +
-                                              ' joined the ' + role.name + ' clan!')
-                    if (role.name == "Crab"):
-                        await client.send_message(message.channel, '**CRAAAAAAAAB!**')
-                except discord.errors.Forbidden:
-                    logger.info("Got a FORBIDDEN error while adding to the clan")
-                    await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
-                                              "join! *AKA you're not permitted to join this role or I'm not allowed " +
-                                              "to give it to you*")
-            elif role is not None and role in message.author.roles:
-                await client.remove_roles(message.author, role)
-                role_numbers_per_server[message.server.name][role.name] -= 1
-                if role_numbers_per_server[message.server.name][role.name] == 0:
-                    del (role_numbers_per_server[message.server.name][role.name])
-                await client.send_message(message.channel, 'Let it be known that ' + message.author.mention +
-                                          ' left the ' + role.name + ' clan!')
+            if clan_name in forbidden_roles[message.server.name]:
+                await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
+                                          "join!")
             else:
-                logger.info("The clan doesn't exist")
-                await client.send_message(message.channel, 'Unfortunately, ' + message.author.mention +
-                                          '-san, this clan is not listed in the Imperial Records...')
+                logger.info('That clan is ' + clan_name)
+                role = discord.utils.find(lambda r: r.name == clan_name, message.server.roles)
+                if role is None:
+                    # lcgplayer and rpgplayer however, aren't, so we must cover that case as well.
+                    role = discord.utils.find(lambda r: r.name == clan_name.lower(), message.server.roles)
+                if role is not None and role not in message.author.roles:
+                    try:
+                        await client.add_roles(message.author, role)
+                        role_numbers_per_server[message.server.name][role.name] += 1
+                        await client.send_message(message.channel, 'Let it be known that ' + message.author.mention +
+                                                  ' joined the ' + role.name + ' clan!')
+                        if (role.name == "Crab"):
+                            await client.send_message(message.channel, '**CRAAAAAAAAB!**')
+                    except discord.errors.Forbidden:
+                        logger.info("Got a FORBIDDEN error while adding to the clan")
+                        await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
+                                                  "join! *AKA you're not permitted to join this role or I'm not allowed " +
+                                                  "to give it to you*")
+                elif role is not None and role in message.author.roles:
+                    await client.remove_roles(message.author, role)
+                    role_numbers_per_server[message.server.name][role.name] -= 1
+                    if role_numbers_per_server[message.server.name][role.name] == 0:
+                        del (role_numbers_per_server[message.server.name][role.name])
+                    await client.send_message(message.channel, 'Let it be known that ' + message.author.mention +
+                                              ' left the ' + role.name + ' clan!')
+                else:
+                    logger.info("The clan doesn't exist")
+                    await client.send_message(message.channel, 'Unfortunately, ' + message.author.mention +
+                                              '-san, this clan is not listed in the Imperial Records...')
         elif len(command) == 2:
             if not message.author.server_permissions.manage_server:
                 logger.warning(message.author.name + ' try to set default or roles without permission!')
@@ -206,6 +225,22 @@ async def on_message(message):
                     await save_hidden_roles_to_file()
                     await client.send_message(message.channel,
                                               role.name + ' has been added to the hidden roles list.')
+                if command[1] == 'forbidden':
+                    role = discord.utils.find(lambda r: r.name == command[0], message.server.roles)
+                    try:
+                        forbidden_roles[message.server.name]
+                    except KeyError:
+                        forbidden_roles[message.server.name] = []
+                    if role.name in forbidden_roles[message.server.name]:
+                        forbidden_roles[message.server.name].remove(role.name)
+                        await save_forbidden_roles_to_file()
+                        await client.send_message(message.channel, role.name +
+                                                  ' has been removed from the forbidden roles list.')
+                    else:
+                        forbidden_roles[message.server.name].append(role.name)
+                        await save_forbidden_roles_to_file()
+                        await client.send_message(message.channel,
+                                                  role.name + ' has been added to the forbidden roles list.')
             else:
                 await client.send_message(message.channel, 'That is not a request I can fulfill. Perhaps you should ' +
                                           'ask for !help first.')
