@@ -145,7 +145,7 @@ async def on_message(message):
                     "exploding dice and keeps the highest Y. \n" + \
                     "Unskilled can be set to prevent the dice from exploding, while Emphasis rerolls 1s. \n" + \
                     "Mastery allows the dice to explode on 9s and 10s. \n" + \
-                    "Ex. !roll 6k3 TN20 or !roll 2k2 TN10 unskilled \n \n" + \ \
+                    "Ex. !roll 6k3 TN20 or !roll 2k2 TN10 unskilled \n \n" + \
                     "!gencon lets you count down the time until Gencon!"
         await client.send_message(message.channel, help_text)
 
@@ -155,6 +155,11 @@ async def on_message(message):
             logger.info(message.author.name + ' wants to join or leave a clan!')
             # All clan roles are nicely capitalized
             clan_name = command[0].lower().capitalize()
+            try:
+                forbidden_roles[message.server.name]
+            except KeyError:
+                forbidden_roles[message.server.name] = []
+
             if clan_name in forbidden_roles[message.server.name]:
                 await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
                                           "join!")
