@@ -43,7 +43,7 @@ def validate_card_name(card_name):
         except json.decoder.JSONDecodeError:
             db_records = {}
 
-    if db_records == {} or datetime.datetime.strptime(db_records['last_updated'], "%Y-%m-%dT%H:%M:%S").day < datetime.datetime.utcnow().day:
+    if db_records == {} or (datetime.datetime.strptime(db_records['last_updated'], "%Y-%m-%dT%H:%M:%S") - datetime.datetime.today()).days < 0:
         r = requests.get("https://fiveringsdb.com/cards")
         request_data = r.json()
 
