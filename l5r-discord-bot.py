@@ -149,7 +149,7 @@ async def on_message(message):
                     "!gencon lets you count down the time until Gencon!"
         await client.send_message(message.channel, help_text)
 
-    if message.content.startswith('!clan') and message.content != '!clans':
+    if message.content.lower().startswith('!clan') and message.content.lower() != '!clans':
         command = message.content.split(' ')[1:]
         if len(command) == 1:
             logger.info(message.author.name + ' wants to join or leave a clan!')
@@ -249,7 +249,7 @@ async def on_message(message):
             else:
                 await client.send_message(message.channel, 'That is not a request I can fulfill. Perhaps you should ' +
                                           'ask for !help first.')
-    if message.content.startswith('!clans'):
+    if message.content.lower().startswith('!clans'):
         roles = role_numbers_per_server[message.server.name]
         logger.info("Displaying clan numbers")
         try:
@@ -263,7 +263,7 @@ async def on_message(message):
         response += "``` \n"
         await client.send_message(message.channel, response)
         await update_server_stats()
-    if message.content.startswith('!roll'):
+    if message.content.lower().startswith('!roll'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
             await client.send_message(message.channel,
@@ -277,25 +277,25 @@ async def on_message(message):
             await client.send_message(message.channel,
                                       "Sorry, samurai-san, I didn't understand your request. \n"
                                       "!help should be informative for you.")
-    if message.content.startswith('!card'):
+    if message.content.lower().startswith('!card'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
             await client.send_message(message.channel, "I can look cards up for you, honourable samurai-san, but please tell me which one.")
         else:
             await client.send_message(message.channel, cards.get_card_url(command))
-    if message.content.startswith('!oracle'):
+    if message.content.lower().startswith('!oracle'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
             await client.send_message(message.channel, "I can look Old5r cards up for you, honourable samurai-san.")
         else:
             await client.send_message(message.channel, oracle.get_card_url(command))
-    if message.content.startswith('!gencon'):
+    if message.content.lower().startswith('!gencon'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
             await client.send_message(message.channel, "Say '!gencon COMMAND'. Valid commands are: days, hours, minutes, seconds, parsecs, links")
         else:
             await client.send_message(message.channel, gencon.do_gencon(command))
-    if message.content.startswith('!reload'):
+    if message.content.lower().startswith('!reload'):
         await reload_from_files()
 
 
