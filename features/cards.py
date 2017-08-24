@@ -17,16 +17,16 @@ def get_card_url(command):
             card_name += ' '
         card_name += string.lower()
 
-    valid_name, cards = validate_card_name(card_name)
+    valid_name, cards_or_pack = validate_card_name(card_name)
     if valid_name:
         card_name = urllib.parse.unquote(card_name)
         card_name = card_name.replace("'", "-")
         card_name = card_name.replace(" ", "-")
         card_name = card_name.replace("!", "")
-        return "https://fiveringsdb.com/bundles/card_images/" + card_name + ".png"
+        return "https://fiveringsdb.com/bundles/card_images/" + cards_or_pack + "/" + card_name + ".png"
     else:
         message = ""
-        for card, _ in cards:
+        for card, _ in cards_or_pack:
             if message != "":
                 message += ", "
             message += prettify_name(card)
@@ -48,16 +48,17 @@ def validate_card_name(card_name):
         request_data = r.json()
 
         db_records['last_updated'] = request_data['last_updated'][:-6]
-        card_names = []
+        card_names = {}
         for card in request_data['records']:
-            card_names.append(card['name_canonical'])
+            pack_name = card['pack_cards'][0]['pack']['id']
+            card_names[card['name_canonical']] = pack_name
         db_records['cards'] = card_names
         with open('card_db.json', 'w') as outfile:
             json.dump(db_records, outfile)
             logger.info('Saved new card_db to file')
 
     if card_name in db_records['cards']:
-        return True, ""
+        return True, db_records['cards'][card_name]
 
     potentials = process.extract(card_name, set(db_records['cards']), limit=3)
     return False, potentials
