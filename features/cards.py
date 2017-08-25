@@ -23,7 +23,7 @@ def get_card_url(command):
         card_name = card_name.replace("'", "-")
         card_name = card_name.replace(" ", "-")
         card_name = card_name.replace("!", "")
-        return "https://fiveringsdb.com/bundles/card_images/" + cards_or_pack + "/" + card_name + ".png"
+        return "https://fiveringsdb.com/bundles/card_images/" + cards_or_pack + "/" + card_name + ".jpg"
     else:
         message = ""
         for card, _ in cards_or_pack:
