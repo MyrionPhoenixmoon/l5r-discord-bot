@@ -2,6 +2,7 @@ import discord
 import logging
 import json
 import collections
+import random
 
 import features.dice as dice
 import features.cards as cards
@@ -175,8 +176,15 @@ async def on_message(message):
                         role_numbers_per_server[message.server.name][role.name] += 1
                         await client.send_message(message.channel, 'Let it be known that ' + message.author.mention +
                                                   ' joined the ' + role.name + ' clan!')
-                        if (role.name == "Crab"):
+                        if role.name == "Crab":
                             await client.send_message(message.channel, '**CRAAAAAAAAB!**')
+                        if role.name == "Dragon":
+                            await client.send_message(message.channel, 'What makes a Dragon?')
+                        if role.name == "Scorpion":
+                            await client.send_message(message.channel, message.author.mention + ' can swim!')
+                        if role.name == "Phoenix":
+                            await client.send_message(message.channel, 'It has been ~~' + str(random.randint(0, 20)) +
+                                                      '~~ 0 days since our last maho incident.')
                     except discord.errors.Forbidden:
                         logger.info("Got a FORBIDDEN error while adding to the clan")
                         await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
