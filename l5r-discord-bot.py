@@ -185,6 +185,8 @@ async def on_message(message):
                         if role.name == "Phoenix":
                             await client.send_message(message.channel, 'It has been ~~' + str(random.randint(0, 20)) +
                                                       '~~ 0 days since our last maho incident.')
+                        if role.name == "Crane":
+                            await client.send_message(message.channel, 'A most excellent choice!')
                     except discord.errors.Forbidden:
                         logger.info("Got a FORBIDDEN error while adding to the clan")
                         await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
