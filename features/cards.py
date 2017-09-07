@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger('discord')
 
 
-def get_card_url(command):
+def get_card_info(command):
     logger.info("Getting a card URL for " + str(command))
     card_name = ''
 
@@ -24,7 +24,9 @@ def get_card_url(command):
         card_name = card_name.replace(" ", "-")
         card_name = card_name.replace("!", "")
         logger.info("It's a valid card, posting the URL now")
-        return "https://l5rdb.net/lcg/cards/" + cards_or_pack + "/" + card_name + ".jpg"
+        card_info = get_card_details(card_name)
+        card_info += "\n https://l5rdb.net/lcg/cards/" + cards_or_pack + "/" + card_name + ".jpg"
+        return card_info
     else:
         message = ""
         for card, _ in cards_or_pack:
@@ -70,10 +72,56 @@ def validate_card_name(card_name):
     return False, potentials
 
 
-def prettify_name(cardname):
-    cardname = cardname.split(" ")
+def prettify_name(card_name):
+    card_name = card_name.split(" ")
     pretty = ""
-    for word in cardname:
+    for word in card_name:
         pretty += word.capitalize() + " "
 
     return pretty
+
+
+def get_card_details(card_name):
+    r = requests.get("https://api.fiveringsdb.com/cards/" + card_name)
+    card_data = r.json()['record']
+    message = "> **" + prettify_name(card_name) + "** \n"
+    message += "> Clan: " + card_data['clan'].capitalize() + " \n"
+    message += "> Unique: " + card_data['unicity'].capitalize() + " \n"
+    if card_data['type'] != 'province':
+        message += "> Deck: " + card_data['side'].capitalize() + " \n"
+        if card_data['side'] == 'conflict':
+            message += "> Influence Cost: " + str(card_data['influence_cost']) + " \n"
+        message += "> \n"
+
+        message += "> Type: " + card_data['type'].capitalize() + " \n"
+        message += "> Fate Cost: " + str(card_data['cost']) + " \n"
+        message += get_pol_mil(card_data)
+    if card_data['type'] == "province":
+        message += "> Element: " + card_data['element'].capitalize() + " \n"
+        message += "> Strength: " + str(card_data['strength']) + " \n"
+    traits = ""
+    for trait in card_data['traits']:
+        traits += trait.capitalize() + ", "
+    traits = traits[:-2]
+    message += "> Traits: " + traits + " \n"
+    message += "> Text: " + card_data['text_canonical'] + " \n"
+    message += "\n "
+    
+    return message
+
+
+def get_pol_mil(card_data):
+    message = ""
+    if card_data['type'] == 'attachment':
+        message += "> Political Bonus: " + str(card_data['political_bonus']) + " \n"
+        message += "> Military Bonus: " + str(card_data['military_bonus']) + " \n"
+        message += "> \n"
+    if card_data['type'] == 'character':
+        message += "> Political Skill: " + str(card_data['political']) + " \n"
+        message += "> Military Skill: " + str(card_data['military']) + " \n"
+        message += "> Glory: " + str(card_data['glory']) + " \n"
+        message += "> \n"
+    if card_data['type'] == 'holding':
+        message += "> Province Bonus: " + str(card_data['strength_bonus']) + " \n"
+
+    return message
