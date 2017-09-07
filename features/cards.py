@@ -23,9 +23,9 @@ def get_card_info(command):
         card_name = card_name.replace("'", "-")
         card_name = card_name.replace(" ", "-")
         card_name = card_name.replace("!", "")
-        logger.info("It's a valid card, posting the URL now")
+        logger.info("It's a valid card, posting the info now")
         card_info = get_card_details(card_name)
-        card_info += "\n https://l5rdb.net/lcg/cards/" + cards_or_pack + "/" + card_name + ".jpg"
+        card_info += "https://l5rdb.net/lcg/cards/" + cards_or_pack + "/" + card_name + ".jpg"
         return card_info
     else:
         message = ""
@@ -82,46 +82,48 @@ def prettify_name(card_name):
 
 
 def get_card_details(card_name):
+    logger.info("Getting card details from fiveringsdb")
     r = requests.get("https://api.fiveringsdb.com/cards/" + card_name)
     card_data = r.json()['record']
-    message = "> **" + prettify_name(card_name) + "** \n"
-    message += "> Clan: " + card_data['clan'].capitalize() + " \n"
-    message += "> Unique: " + card_data['unicity'].capitalize() + " \n"
+    message = "__**" + card_data['name'] + "**__ \n"
+    message += "Clan: "+ card_data['clan'].capitalize() + " \n"
+    message += "Unique: "+ str(card_data['unicity']).capitalize() + " \n"
     if card_data['type'] != 'province':
-        message += "> Deck: " + card_data['side'].capitalize() + " \n"
+        message += "Deck: " + card_data['side'].capitalize() + " \n"
         if card_data['side'] == 'conflict':
-            message += "> Influence Cost: " + str(card_data['influence_cost']) + " \n"
-        message += "> \n"
+            message += "Influence Cost: " + str(card_data['influence_cost']) + " \n"
+        message += " \n"
 
-        message += "> Type: " + card_data['type'].capitalize() + " \n"
-        message += "> Fate Cost: " + str(card_data['cost']) + " \n"
-        message += get_pol_mil(card_data)
+        message += "Type: " + card_data['type'].capitalize() + " \n"
+        message += get_type_specific_details(card_data)
     if card_data['type'] == "province":
-        message += "> Element: " + card_data['element'].capitalize() + " \n"
-        message += "> Strength: " + str(card_data['strength']) + " \n"
+        message += "Element: " + card_data['element'].capitalize() + " \n"
+        message += "Strength: " + str(card_data['strength']) + " \n"
     traits = ""
     for trait in card_data['traits']:
         traits += trait.capitalize() + ", "
     traits = traits[:-2]
-    message += "> Traits: " + traits + " \n"
-    message += "> Text: " + card_data['text_canonical'] + " \n"
+    message += "Traits: " + traits + " \n"
+    message += "Text: ```\n" + card_data['text_canonical'].capitalize() + "``` \n"
     message += "\n "
-    
+
     return message
 
 
-def get_pol_mil(card_data):
+def get_type_specific_details(card_data):
     message = ""
     if card_data['type'] == 'attachment':
-        message += "> Political Bonus: " + str(card_data['political_bonus']) + " \n"
-        message += "> Military Bonus: " + str(card_data['military_bonus']) + " \n"
-        message += "> \n"
+        message += "Fate Cost: " + str(card_data['cost']) + " \n"
+        message += "Political Bonus: " + str(card_data['political_bonus']) + " \n"
+        message += "Military Bonus: " + str(card_data['military_bonus']) + " \n"
+        message += " \n"
     if card_data['type'] == 'character':
-        message += "> Political Skill: " + str(card_data['political']) + " \n"
-        message += "> Military Skill: " + str(card_data['military']) + " \n"
-        message += "> Glory: " + str(card_data['glory']) + " \n"
-        message += "> \n"
+        message += "Fate Cost: " + str(card_data['cost']) + " \n"
+        message += "Political Skill: " + str(card_data['political']) + " \n"
+        message += "Military Skill: " + str(card_data['military']) + " \n"
+        message += "Glory: " + str(card_data['glory']) + " \n"
+        message += " \n"
     if card_data['type'] == 'holding':
-        message += "> Province Bonus: " + str(card_data['strength_bonus']) + " \n"
+        message += "Province Bonus: " + str(card_data['strength_bonus']) + " \n"
 
     return message

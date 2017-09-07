@@ -309,4 +309,4 @@ async def on_message(message):
         await reload_from_files()
 
 
-client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAgYmg.L9GPRhrc9HbaFEv2tyS5aG54FOY')
+client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAhMEw.XLJChLDmEkr1i2hXw1YWouzJVpw')
