@@ -8,8 +8,36 @@ import logging
 logger = logging.getLogger('discord')
 
 
+def get_card_image(command):
+    logger.info("Getting card image for " + str(command))
+    card_name = ''
+
+    for string in command:
+        if card_name != '':
+            card_name += ' '
+        card_name += string.lower()
+
+    valid_name, cards_or_pack = validate_card_name(card_name)
+    if valid_name:
+        card_name = urllib.parse.unquote(card_name)
+        card_name = card_name.replace("'", "-")
+        card_name = card_name.replace(" ", "-")
+        card_name = card_name.replace("!", "")
+        logger.info("It's a valid card, posting the image now")
+        return "https://l5rdb.net/lcg/cards/" + cards_or_pack + "/" + card_name + ".jpg"
+    else:
+        message = ""
+        for card, _ in cards_or_pack:
+            if message != "":
+                message += ", "
+            message += prettify_name(card)
+        logger.info("It's not a valid card, posting alternatives now")
+        return "I'm sorry, honourable samurai-san, but this card is not known. \n" + \
+               "Perhaps you meant one of these three? \n" + message
+
+
 def get_card_info(command):
-    logger.info("Getting a card URL for " + str(command))
+    logger.info("Getting card info for " + str(command))
     card_name = ''
 
     for string in command:
@@ -25,7 +53,6 @@ def get_card_info(command):
         card_name = card_name.replace("!", "")
         logger.info("It's a valid card, posting the info now")
         card_info = get_card_details(card_name)
-        card_info += "https://l5rdb.net/lcg/cards/" + cards_or_pack + "/" + card_name + ".jpg"
         return card_info
     else:
         message = ""
@@ -93,7 +120,8 @@ def get_card_details(card_name):
     for trait in card_data['traits']:
         traits += trait.capitalize() + ", "
     traits = traits[:-2]
-    message += "Traits: " + traits + " \n"
+    if traits != "":
+        message += "Traits: " + traits + " \n"
     message += "Text: ```\n" + card_data['text_canonical'].capitalize() + "``` \n"
     message += "\n "
 

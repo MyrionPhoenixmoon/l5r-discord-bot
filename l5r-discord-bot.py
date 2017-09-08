@@ -292,6 +292,12 @@ async def on_message(message):
         if len(command) < 1:
             await client.send_message(message.channel, "I can look cards up for you, honourable samurai-san, but please tell me which one.")
         else:
+            await client.send_message(message.channel, cards.get_card_image(command))
+    if message.content.lower().startswith('!text'):
+        command = message.content.split(' ')[1:]
+        if len(command) < 1:
+            await client.send_message(message.channel, "I can look cards in text format up for you, honourable samurai-san, but please tell me which one.")
+        else:
             await client.send_message(message.channel, cards.get_card_info(command))
     if message.content.lower().startswith('!oracle'):
         command = message.content.split(' ')[1:]
