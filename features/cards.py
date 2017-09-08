@@ -86,19 +86,9 @@ def get_card_details(card_name):
     r = requests.get("https://api.fiveringsdb.com/cards/" + card_name)
     card_data = r.json()['record']
     message = "__**" + card_data['name'] + "**__ \n"
-    message += "Clan: "+ card_data['clan'].capitalize() + " \n"
-    message += "Unique: "+ str(card_data['unicity']).capitalize() + " \n"
-    if card_data['type'] != 'province':
-        message += "Deck: " + card_data['side'].capitalize() + " \n"
-        if card_data['side'] == 'conflict':
-            message += "Influence Cost: " + str(card_data['influence_cost']) + " \n"
-        message += " \n"
-
-        message += "Type: " + card_data['type'].capitalize() + " \n"
-        message += get_type_specific_details(card_data)
-    if card_data['type'] == "province":
-        message += "Element: " + card_data['element'].capitalize() + " \n"
-        message += "Strength: " + str(card_data['strength']) + " \n"
+    message += "Clan: " + card_data['clan'].capitalize() + " \n"
+    message += "Unique: " + str(card_data['unicity']).capitalize() + " \n"
+    message += get_type_specific_details(card_data)
     traits = ""
     for trait in card_data['traits']:
         traits += trait.capitalize() + ", "
@@ -112,6 +102,15 @@ def get_card_details(card_name):
 
 def get_type_specific_details(card_data):
     message = ""
+    message += "Type: " + card_data['type'].capitalize() + " \n"
+    if card_data['type'] != 'province':
+        message += "Deck: " + card_data['side'].capitalize() + " \n"
+        if card_data['side'] == 'conflict':
+            message += "Influence Cost: " + str(card_data['influence_cost']) + " \n"
+        message += " \n"
+    if card_data['type'] == "province":
+        message += "Element: " + card_data['element'].capitalize() + " \n"
+        message += "Strength: " + str(card_data['strength']) + " \n"
     if card_data['type'] == 'attachment':
         message += "Fate Cost: " + str(card_data['cost']) + " \n"
         message += "Political Bonus: " + str(card_data['political_bonus']) + " \n"
@@ -125,5 +124,7 @@ def get_type_specific_details(card_data):
         message += " \n"
     if card_data['type'] == 'holding':
         message += "Province Bonus: " + str(card_data['strength_bonus']) + " \n"
+    if card_data['type'] == 'event':
+        message += "Fate Cost: " + str(card_data['cost']) + " \n"
 
     return message
