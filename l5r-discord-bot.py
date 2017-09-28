@@ -3,6 +3,7 @@ import logging
 import json
 import collections
 import random
+import urllib
 
 import features.dice as dice
 import features.cards as cards
@@ -316,7 +317,7 @@ async def on_message(message):
         if len(command) < 1:
             await client.send_message(message.channel, "Here's the wiki: https://l5r.gamepedia.com/")
         else:
-            await client.send_message(message.channel, 'https://l5r.gamepedia.com/index.php?search=' + ' '.join(command))
+            await client.send_message(message.channel, 'https://l5r.gamepedia.com/index.php?search=' + urllib.parse.quote(' '.join(command)))
 
 
 client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAgYmg.L9GPRhrc9HbaFEv2tyS5aG54FOY')
