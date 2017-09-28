@@ -307,6 +307,10 @@ async def on_message(message):
             await client.send_message(message.channel, gencon.do_gencon(command))
     if message.content.lower().startswith('!reload'):
         await reload_from_files()
+    if message.content.lower().startswith('!report'):
+        await client.send_message(message.channel, "https://goo.gl/forms/aZw0kmvgBhyNc2sI2")
+    if message.content.lower().startswith('!stats'):
+        await client.send_message(message.channel, "https://docs.google.com/spreadsheets/d/1sQ72zgKaGEV9XcDNObWopGmnCbP9hrwtI2SqNUpTDaM/edit?usp=sharing")
 
 
 client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAgYmg.L9GPRhrc9HbaFEv2tyS5aG54FOY')
