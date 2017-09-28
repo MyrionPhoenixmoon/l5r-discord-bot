@@ -311,6 +311,12 @@ async def on_message(message):
         await client.send_message(message.channel, "https://goo.gl/forms/aZw0kmvgBhyNc2sI2")
     if message.content.lower().startswith('!stats'):
         await client.send_message(message.channel, "https://docs.google.com/spreadsheets/d/1sQ72zgKaGEV9XcDNObWopGmnCbP9hrwtI2SqNUpTDaM/edit?usp=sharing")
+    if message.content.lower().startswith('!wiki'):
+        command = message.content.split(' ')[1:]
+        if len(command) < 1:
+            await client.send_message(message.channel, "Here's the wiki: https://l5r.gamepedia.com/")
+        else:
+            await client.send_message(message.channel, 'https://l5r.gamepedia.com/index.php?search=' + ' '.join(command))
 
 
 client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAgYmg.L9GPRhrc9HbaFEv2tyS5aG54FOY')
