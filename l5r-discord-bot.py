@@ -148,7 +148,9 @@ async def on_message(message):
                     "Unskilled can be set to prevent the dice from exploding, while Emphasis rerolls 1s. \n" + \
                     "Mastery allows the dice to explode on 9s and 10s. \n" + \
                     "Ex. !roll 6k3 TN20 or !roll 2k2 TN10 unskilled \n \n" + \
-                    "!gencon lets you count down the time until Gencon!"
+                    "!gencon lets you count down the time until Gencon! \n" + \
+                    "!wiki searches the L5R Gameapedia Wiki \n" + \
+                    "!report and !stats provide links to win/loss statistics gathering and data"
         await client.send_message(message.channel, help_text)
 
     if message.content.lower().startswith('!clan') and message.content.lower() != '!clans':
