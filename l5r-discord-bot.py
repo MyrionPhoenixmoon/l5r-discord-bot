@@ -311,9 +311,9 @@ async def on_message(message):
     if message.content.lower().startswith('!reload'):
         await reload_from_files()
     if message.content.lower().startswith('!report'):
-        await client.send_message(message.channel, "https://goo.gl/forms/aZw0kmvgBhyNc2sI2")
+        await client.send_message(message.channel, "<https://goo.gl/forms/aZw0kmvgBhyNc2sI2>")
     if message.content.lower().startswith('!stats'):
-        await client.send_message(message.channel, "https://docs.google.com/spreadsheets/d/1sQ72zgKaGEV9XcDNObWopGmnCbP9hrwtI2SqNUpTDaM/edit?usp=sharing")
+        await client.send_message(message.channel, "<https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0HFgzxmgf9hcqIXGniaU3MU8uZjyzd2kAsrDtbHav283sWoY7Z1vc5dOlCz3OpIdwubLkAcovb7Zn/pubhtml>")
     if message.content.lower().startswith('!wiki'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
