@@ -45,7 +45,6 @@ def get_card_url(command):
                    "https://l5rdb.net/lcg/cards/" + cards_or_pack[0] + "/" + card_name + ".jpg"
 
 
-
 def validate_card_name(card_name):
     """Returns the card name or potential alternatives."""
 
@@ -76,7 +75,7 @@ def validate_card_name(card_name):
         return True, db_records['cards'][card_name]
 
     logger.info("Presenting alternatives")
-    potentials = process.extract(card_name, set(db_records['cards']), limit=3)
+    potentials = process.extract(card_name, set(db_records['cards']), limit=3, scorer=fuzz.ratio)
     if fuzz.partial_ratio(card_name, potentials[0]) >= 75:
         logger.info("Found a good match in DB")
         logger.info("Matched " + str(card_name) + " to " + str(potentials[0][0]) + " with similarity of " + str(potentials[0][1]))
