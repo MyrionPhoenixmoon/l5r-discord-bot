@@ -2,6 +2,7 @@ import urllib
 import requests
 import json
 import datetime
+from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import logging
 
@@ -67,6 +68,10 @@ def validate_card_name(card_name):
 
     logger.info("Presenting alternatives")
     potentials = process.extract(card_name, set(db_records['cards']), limit=3)
+    if fuzz.partial_ratio(card_name, potentials[0] >= 75):
+        logger.info("Found a good match in DB")
+        return True, db_records['cards'][potentials[0]]
+
     return False, potentials
 
 
