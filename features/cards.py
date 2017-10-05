@@ -68,7 +68,7 @@ def validate_card_name(card_name):
 
     logger.info("Presenting alternatives")
     potentials = process.extract(card_name, set(db_records['cards']), limit=3)
-    if fuzz.partial_ratio(card_name, potentials[0] >= 75):
+    if fuzz.partial_ratio(card_name, potentials[0]) >= 75:
         logger.info("Found a good match in DB")
         logger.info("Matched" + card_name + " to " + potentials[0])
         card_name = prettify_name(potentials[0])
