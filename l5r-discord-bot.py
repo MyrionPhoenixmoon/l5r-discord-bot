@@ -326,16 +326,12 @@ async def on_message(message):
         if len(command) < 1:
             await client.send_message(message.channel, "https://fiveringsdb.com/rules/reference")
         else:
-            data, error_message = rulings.get_rulings(command)
-            if data is None:
+            embeds, error_message = rulings.get_rulings(command)
+            if embeds is None:
                 await client.send_message(message.channel, error_message)
             else:
-                em = discord.Embed(title="Rulings for " + cards.prettify_name(data['card_name']), description='FAQ and RRG entries',
-                           colour=0xDEADBF, url=data['url'])
-                em.set_author(name='Miya Herald', icon_url=client.user.default_avatar_url)
-                for entry in data['entries']:
-                    em.add_field(name=entry['source'], value=entry['text'])
-                await client.send_message(message.channel, embed=em)
+                for embed in embeds:
+                    await client.send_message(message.channel, embed=embed)
 
 
 client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAgYmg.L9GPRhrc9HbaFEv2tyS5aG54FOY')
