@@ -22,6 +22,9 @@ def get_rulings(command):
         if isinstance(cards_or_pack, tuple):
             logger.info("Guessed a single card")
             card_name = cards_or_pack[1]
+
+        data = {}
+        data['card_name'] = card_name
         card_name = urllib.parse.unquote(card_name)
         card_name = card_name.replace("'", "-")
         card_name = card_name.replace(" ", "-")
@@ -30,11 +33,11 @@ def get_rulings(command):
         logger.info("It's a valid card, fetching rulings now")
         url = "https://api.fiveringsdb.com/cards/" + card_name + "/rulings"
         response = requests.get("https://api.fiveringsdb.com/cards/" + card_name + "/rulings")
-        data = {}
+
         entries = response.json()["records"]
         data['entries'], split_at = split_rulings(entries)
         data['url'] = url
-        data['card_name'] = cards_or_pack[1]
+
 
         if split_at > 0:
             em1 = discord.Embed(title="Rulings for " + prettify_name(data['card_name'] + " Part 1"), description='Rulings',
