@@ -63,7 +63,7 @@ def validate_card_name(card_name):
         db_records['last_updated'] = request_data['last_updated'][:-6]
         card_names = {}
         for card in request_data['records']:
-            pack_name = card['pack_cards'][0]['pack']['id'] if len(card['pack_cards']) > 0 else 'Unknown Pack'
+            pack_name = card['pack_cards'][0]['pack']['id'] if len(card['pack_cards']) > 0 else 'Unknown_Pack'
             card_names[card['name_canonical']] = pack_name
         db_records['cards'] = card_names
         with open('card_db.json', 'w') as outfile:
