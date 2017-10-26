@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger('discord')
 
 DESCRIPTION_TEXT = 'Click the links for more information'
-TITLE_TEXT = 'Provided by fiveringsdb.com'
+TITLE_TEXT = 'Rulings from fiveringsdb.com'
 
 
 def get_rulings(command):
@@ -50,15 +50,15 @@ def get_rulings(command):
                                 colour=0xDEADBF, url=data['url'])
             for entry in data['entries'][split_at:]:
                 em2.add_field(name=(entry['link'] if entry['link'] is not None else entry['source']), value=entry['text'])
-            em1.set_author(name="Rulings for " + prettify_name(data['card_name']) + " Part 1")
-            em2.set_author(name="Rulings for " + prettify_name(data['card_name']) + " Part 2")
+            em1.set_author(name=prettify_name(data['card_name']) + " Part 1")
+            em2.set_author(name=prettify_name(data['card_name']) + " Part 2")
             return [em1, em2], None
         else:
             em = discord.Embed(title=TITLE_TEXT, description=DESCRIPTION_TEXT,
                                colour=0xDEADBF, url=data['url'])
             for entry in data['entries']:
                 em.add_field(name=(entry['link'] if 'link' in entry else entry['source']), value=entry['text'])
-            em.set_author(name="Rulings for " + prettify_name(data['card_name']))
+            em.set_author(name=prettify_name(data['card_name']))
             return [em], None
     else:
         message = ""
