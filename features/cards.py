@@ -55,12 +55,12 @@ def validate_card_name(card_name):
         except json.decoder.JSONDecodeError:
             db_records = {}
 
-    if db_records == {} or (datetime.datetime.strptime(db_records['last_updated'], "%Y-%m-%dT%H:%M:%S") - datetime.datetime.today()).days < 0:
+    if db_records == {} or (datetime.datetime.strptime(db_records['last_updated'], "%Y-%m-%dT%H:%M:%S.%f") - datetime.datetime.today()).days < 0:
         logger.info("Updating Card DB")
         r = requests.get("https://api.fiveringsdb.com/cards")
         request_data = r.json()
 
-        db_records['last_updated'] = request_data['last_updated'][:-6]
+        db_records['last_updated'] = datetime.datetime.today().isoformat()
         card_names = {}
         for card in request_data['records']:
             pack_name = card['pack_cards'][0]['pack']['id'] if len(card['pack_cards']) > 0 else 'Unknown_Pack'
