@@ -3,11 +3,13 @@ import logging
 import json
 import collections
 import random
+import urllib
 
 import features.dice as dice
 import features.cards as cards
 import features.oracle as oracle
 import features.gencon as gencon
+import features.rulings as rulings
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
@@ -147,7 +149,9 @@ async def on_message(message):
                     "Unskilled can be set to prevent the dice from exploding, while Emphasis rerolls 1s. \n" + \
                     "Mastery allows the dice to explode on 9s and 10s. \n" + \
                     "Ex. !roll 6k3 TN20 or !roll 2k2 TN10 unskilled \n \n" + \
-                    "!gencon lets you count down the time until Gencon!"
+                    "!gencon lets you count down the time until Gencon! \n" + \
+                    "!wiki searches the L5R Gameapedia Wiki \n" + \
+                    "!report and !stats provide links to win/loss statistics gathering and data"
         await client.send_message(message.channel, help_text)
 
     if message.content.lower().startswith('!clan') and message.content.lower() != '!clans':
@@ -190,6 +194,8 @@ async def on_message(message):
                                                       '~~ 0 days since our last maho incident.')
                         if role.name == "Crane":
                             await client.send_message(message.channel, 'A most excellent choice!')
+                        if role.name == "Unicorn":
+                            await client.send_message(message.channel, 'Hello Moto!')
                     except discord.errors.Forbidden:
                         logger.info("Got a FORBIDDEN error while adding to the clan")
                         await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
@@ -310,6 +316,27 @@ async def on_message(message):
             await client.send_message(message.channel, gencon.do_gencon(command))
     if message.content.lower().startswith('!reload'):
         await reload_from_files()
+    if message.content.lower().startswith('!report'):
+        await client.send_message(message.channel, "<https://goo.gl/forms/aZw0kmvgBhyNc2sI2>")
+    if message.content.lower().startswith('!stats'):
+        await client.send_message(message.channel, "<https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0HFgzxmgf9hcqIXGniaU3MU8uZjyzd2kAsrDtbHav283sWoY7Z1vc5dOlCz3OpIdwubLkAcovb7Zn/pubhtml>")
+    if message.content.lower().startswith('!wiki'):
+        command = message.content.split(' ')[1:]
+        if len(command) < 1:
+            await client.send_message(message.channel, "Here's the wiki: https://l5r.gamepedia.com/")
+        else:
+            await client.send_message(message.channel, 'https://l5r.gamepedia.com/index.php?search=' + urllib.parse.quote(' '.join(command)))
+    if message.content.lower().startswith('!ruling'):
+        command = message.content.split(' ')[1:]
+        if len(command) < 1:
+            await client.send_message(message.channel, "https://fiveringsdb.com/rules/reference")
+        else:
+            embeds, error_message = rulings.get_rulings(command)
+            if embeds is None:
+                await client.send_message(message.channel, error_message)
+            else:
+                for embed in embeds:
+                    await client.send_message(message.channel, embed=embed)
 
 
 client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAgYmg.L9GPRhrc9HbaFEv2tyS5aG54FOY')

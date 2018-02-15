@@ -2,6 +2,7 @@ import urllib
 import requests
 import json
 import datetime
+from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 import logging
 
@@ -26,14 +27,22 @@ def get_card_url(command):
         logger.info("It's a valid card, posting the URL now")
         return "https://l5rdb.net/lcg/cards/" + cards_or_pack + "/" + card_name + ".jpg"
     else:
-        message = ""
-        for card, _ in cards_or_pack:
-            if message != "":
-                message += ", "
-            message += prettify_name(card)
-        logger.info("It's not a valid card, posting alternatives now")
-        return "I'm sorry, honourable samurai-san, but this card is not known. \n" + \
-               "Perhaps you meant one of these three? \n" + message
+        if isinstance(cards_or_pack, list):
+            message = ""
+            for card, _ in cards_or_pack:
+                if message != "":
+                    message += ", "
+                message += prettify_name(card)
+            logger.info("It's not a valid card, posting alternatives now")
+            return "I'm sorry, honourable samurai-san, but this card is not known. \n" + \
+                   "Perhaps you meant one of these three? \n" + message
+        else:
+            card_name = urllib.parse.unquote(cards_or_pack[1])
+            card_name = card_name.replace("'", "-")
+            card_name = card_name.replace(" ", "-")
+            card_name = card_name.replace("!", "")
+            return "I'm guessing you meant this card: \n" + \
+                   "https://l5rdb.net/lcg/cards/" + cards_or_pack[0] + "/" + card_name + ".jpg"
 
 
 def validate_card_name(card_name):
@@ -46,15 +55,15 @@ def validate_card_name(card_name):
         except json.decoder.JSONDecodeError:
             db_records = {}
 
-    if db_records == {} or (datetime.datetime.strptime(db_records['last_updated'], "%Y-%m-%dT%H:%M:%S") - datetime.datetime.today()).days < 0:
+    if db_records == {} or (datetime.datetime.strptime(db_records['last_updated'], "%Y-%m-%dT%H:%M:%S.%f") - datetime.datetime.today()).days < 0:
         logger.info("Updating Card DB")
         r = requests.get("https://api.fiveringsdb.com/cards")
         request_data = r.json()
 
-        db_records['last_updated'] = request_data['last_updated'][:-6]
+        db_records['last_updated'] = datetime.datetime.today().isoformat()
         card_names = {}
         for card in request_data['records']:
-            pack_name = card['pack_cards'][0]['pack']['id']
+            pack_name = card['pack_cards'][0]['pack']['id'] if len(card['pack_cards']) > 0 else 'Unknown_Pack'
             card_names[card['name_canonical']] = pack_name
         db_records['cards'] = card_names
         with open('card_db.json', 'w') as outfile:
@@ -66,7 +75,12 @@ def validate_card_name(card_name):
         return True, db_records['cards'][card_name]
 
     logger.info("Presenting alternatives")
-    potentials = process.extract(card_name, set(db_records['cards']), limit=3)
+    potentials = process.extract(card_name, set(db_records['cards']), limit=3, scorer=fuzz.ratio)
+    if fuzz.partial_ratio(card_name, potentials[0]) >= 75:
+        logger.info("Found a good match in DB")
+        logger.info("Matched " + str(card_name) + " to " + str(potentials[0][0]) + " with similarity of " + str(potentials[0][1]))
+        return False, (db_records['cards'][potentials[0][0]], potentials[0][0])
+
     return False, potentials
 
 
