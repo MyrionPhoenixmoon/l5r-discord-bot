@@ -168,6 +168,9 @@ async def on_message(message):
             if clan_name in forbidden_roles[message.server.name]:
                 await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
                                           "join!")
+            elif 'disloyal' in message.author.roles:
+                await client.send_message(message.channel, 'You have betrayed your clan too often! You may not' 
+                                          'join a clan at this time!')
             else:
                 logger.info('That clan is ' + clan_name)
                 role = discord.utils.find(lambda r: r.name == clan_name, message.server.roles)
