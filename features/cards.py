@@ -18,18 +18,14 @@ def get_card_url(command):
             card_name += ' '
         card_name += string.lower()
 
-    valid_name, cards_or_pack = validate_card_name(card_name)
+    valid_name, url_or_potentials = validate_card_name(card_name)
     if valid_name:
-        card_name = urllib.parse.unquote(card_name)
-        card_name = card_name.replace("'", "-")
-        card_name = card_name.replace(" ", "-")
-        card_name = card_name.replace("!", "")
         logger.info("It's a valid card, posting the URL now")
-        return "https://l5rdb.net/lcg/cards/" + cards_or_pack + "/" + card_name + ".jpg"
+        return url_or_potentials
     else:
-        if isinstance(cards_or_pack, list):
+        if isinstance(url_or_potentials, list):
             message = ""
-            for card, _ in cards_or_pack:
+            for card, _ in url_or_potentials:
                 if message != "":
                     message += ", "
                 message += prettify_name(card)
@@ -37,12 +33,8 @@ def get_card_url(command):
             return "I'm sorry, honourable samurai-san, but this card is not known. \n" + \
                    "Perhaps you meant one of these three? \n" + message
         else:
-            card_name = urllib.parse.unquote(cards_or_pack[1])
-            card_name = card_name.replace("'", "-")
-            card_name = card_name.replace(" ", "-")
-            card_name = card_name.replace("!", "")
             return "I'm guessing you meant this card: \n" + \
-                   "https://l5rdb.net/lcg/cards/" + cards_or_pack[0] + "/" + card_name + ".jpg"
+                   url_or_potentials
 
 
 def validate_card_name(card_name):
@@ -63,8 +55,8 @@ def validate_card_name(card_name):
         db_records['last_updated'] = datetime.datetime.today().isoformat()
         card_names = {}
         for card in request_data['records']:
-            pack_name = card['pack_cards'][0]['pack']['id'] if len(card['pack_cards']) > 0 else 'Unknown_Pack'
-            card_names[card['name_canonical']] = pack_name
+            image_url = find_image_url(card['pack_cards'])
+            card_names[card['name_canonical']] = image_url
         db_records['cards'] = card_names
         with open('card_db.json', 'w') as outfile:
             json.dump(db_records, outfile)
@@ -79,9 +71,16 @@ def validate_card_name(card_name):
     if fuzz.partial_ratio(card_name, potentials[0]) >= 75:
         logger.info("Found a good match in DB")
         logger.info("Matched " + str(card_name) + " to " + str(potentials[0][0]) + " with similarity of " + str(potentials[0][1]))
-        return False, (db_records['cards'][potentials[0][0]], potentials[0][0])
+        return False, db_records['cards'][potentials[0][0]]
 
     return False, potentials
+
+
+def find_image_url(card_packs):
+    for pack in card_packs:
+        if "image_url" in pack:
+            return pack['image_url']
+    return "No image available"
 
 
 def prettify_name(cardname):
