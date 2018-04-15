@@ -159,7 +159,7 @@ async def on_message(message):
         if len(command) == 1:
             logger.info(message.author.name + ' wants to join or leave a clan!')
             # All clan roles are nicely capitalized
-            clan_name = command[0].lower().capitalize()
+            clan_name = command[0].lower().capitalize().strip('<>')
             try:
                 forbidden_roles[message.server.name]
             except KeyError:
