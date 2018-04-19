@@ -1,8 +1,10 @@
-from features.cards import validate_card_name
 from features.cards import prettify_name
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 import urllib
 import requests
 import discord
+import json
 
 import logging
 
@@ -20,14 +22,10 @@ def get_rulings(command):
             card_name += ' '
         card_name += string.lower()
 
-    valid_name, cards_or_pack = validate_card_name(card_name)
-    if valid_name or isinstance(cards_or_pack, tuple):
-        if isinstance(cards_or_pack, tuple):
-            logger.info("Guessed a single card")
-            card_name = cards_or_pack[1]
-
-        data = {}
-        data['card_name'] = card_name
+    valid_name, found = find_card_name(card_name)
+    if valid_name:
+        card_name = found
+        data = {'card_name': card_name}
         card_name = urllib.parse.unquote(card_name)
         card_name = card_name.replace("'", "-")
         card_name = card_name.replace(" ", "-")
@@ -35,6 +33,7 @@ def get_rulings(command):
 
         logger.info("It's a valid card, fetching rulings now")
         url = "https://fiveringsdb.com/card/" + card_name
+        logger.info(url)
         response = requests.get("https://api.fiveringsdb.com/cards/" + card_name + "/rulings")
 
         entries = response.json()["records"]
@@ -62,13 +61,37 @@ def get_rulings(command):
             return [em], None
     else:
         message = ""
-        for card, _ in cards_or_pack:
+        for card, _ in found:
             if message != "":
                 message += ", "
             message += prettify_name(card)
         logger.info("It's not a valid card, posting alternatives now")
         return (None, "I'm sorry, honourable samurai-san, but this card is not known. \n" + \
                 "Perhaps you meant one of these three? \n" + message)
+
+
+def find_card_name(card_name):
+    """Returns the card name or potential alternatives."""
+
+    logger.info("Checking whether the card is an existing card")
+    with open('card_db.json', 'r') as json_data:
+        try:
+            db_records = json.load(json_data)
+        except json.decoder.JSONDecodeError:
+            db_records = {}
+
+    if card_name in db_records['cards']:
+        logger.info("Found card in DB")
+        return True, card_name
+
+    logger.info("Presenting alternatives")
+    potentials = process.extract(card_name, set(db_records['cards']), limit=3, scorer=fuzz.ratio)
+    if fuzz.partial_ratio(card_name, potentials[0]) >= 75:
+        logger.info("Found a good match in DB")
+        logger.info("Matched " + str(card_name) + " to " + str(potentials[0][0]) + " with similarity of " + str(potentials[0][1]))
+        return True, potentials[0][0]
+
+    return False, potentials
 
 
 def split_rulings(entries):
