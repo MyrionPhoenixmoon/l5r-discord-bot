@@ -196,6 +196,10 @@ async def on_message(message):
                             await client.send_message(message.channel, 'A most excellent choice!')
                         if role.name == "Unicorn":
                             await client.send_message(message.channel, 'Hello Moto!')
+                        if role.name == "Lion":
+                            await client.send_message(message.channel, 'Suspect everyone of being your enemy and you will never be disappointed.')
+                        if role.name == "Spider":
+                            await client.send_message(message.channel, 'Welcome to the World Wide Web!')
                     except discord.errors.Forbidden:
                         logger.info("Got a FORBIDDEN error while adding to the clan")
                         await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
@@ -339,4 +343,4 @@ async def on_message(message):
                     await client.send_message(message.channel, embed=embed)
 
 
-client.run('MzE3MjAwMjk5ODQ2NjY0MTky.DAgYmg.L9GPRhrc9HbaFEv2tyS5aG54FOY')
+client.run('MzY3Mzk5NzI5MzU4OTYyNjk5.DL64SQ.BCQf1etPO-PQbfgD4EAF-BSMq60')
