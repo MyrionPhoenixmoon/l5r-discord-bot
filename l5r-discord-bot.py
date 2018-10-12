@@ -48,15 +48,18 @@ async def save_stats_to_file():
         json.dump(role_numbers_per_server, outfile)
         logger.info('Saved new role stats to file')
 
+
 async def save_default_roles_to_file():
     with open('default_roles.json', 'w') as outfile:
         json.dump(default_roles, outfile)
         logger.info('Saved default roles to file')
 
+
 async def save_hidden_roles_to_file():
     with open('hidden_roles.json', 'w') as outfile:
         json.dump(hidden_roles, outfile)
         logger.info('Saved hidden roles to file')
+
 
 async def save_forbidden_roles_to_file():
     with open('forbidden_roles.json', 'w') as outfile:
@@ -72,6 +75,7 @@ async def update_server_stats():
             stats.update(roles)
         role_numbers_per_server[server.name] = stats
         await save_stats_to_file()
+
 
 async def reload_from_files():
     global role_numbers_per_server
@@ -138,8 +142,8 @@ async def on_message(message):
                     "!clan <rolename> default lets the admins set default roles that to apply to new members. \n" + \
                     "!clan <rolename> hidden lets the admins hide roles from the output. \n \n" + \
                     "!clans tells you how many people are in each clan. \n \n" + \
-                    "!card <cardname> looks up cards on https://fiveringsdb.com \n \n" +\
-                    "!oracle <cardname> looks up old5r cards on http://l5rdb.net/ \n \n" +\
+                    "!card <cardname> looks up cards on https://fiveringsdb.com \n \n" + \
+                    "!oracle <cardname> looks up old5r cards on http://l5rdb.net/ \n \n" + \
                     "!roll is used to roll dice. \n" + \
                     "[] denotes optional elements, {} denotes 'pick one'. show_dice shows the individual dice " + \
                     "results. \n " + \
@@ -169,8 +173,8 @@ async def on_message(message):
                 await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
                                           "join!")
             elif 'disloyal' in message.author.roles:
-                await client.send_message(message.channel, 'You have betrayed your clan too often! You may not' 
-                                          'join a clan at this time!')
+                await client.send_message(message.channel, 'You have betrayed your clan too often! You may not'
+                                                           'join a clan at this time!')
             else:
                 logger.info('That clan is ' + clan_name)
                 role = discord.utils.find(lambda r: r.name == clan_name, message.server.roles)
@@ -197,12 +201,14 @@ async def on_message(message):
                         if role.name == "Unicorn":
                             await client.send_message(message.channel, 'Hello Moto!')
                         if role.name == "Lion":
-                            await client.send_message(message.channel, 'Suspect everyone of being your enemy and you will never be disappointed.')
+                            await client.send_message(message.channel,
+                                                      'Suspect everyone of being your enemy and you will never be disappointed.')
                         if role.name == "Spider":
                             await client.send_message(message.channel, 'Welcome to the World Wide Web!')
                     except discord.errors.Forbidden:
                         logger.info("Got a FORBIDDEN error while adding to the clan")
-                        await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
+                        await client.send_message(message.channel,
+                                                  'How presumptuous! This is not a clan one can simply ' +
                                                   "join! *AKA you're not permitted to join this role or I'm not allowed " +
                                                   "to give it to you*")
                 elif role is not None and role in message.author.roles:
@@ -218,8 +224,10 @@ async def on_message(message):
                                               '-san, this clan is not listed in the Imperial Records...')
         elif len(command) == 2:
             if not message.author.server_permissions.manage_server:
-                logger.warning(message.author.name + ' tried to set default, hidden or forbidden roles without permission!')
-                await client.send_message(message.channel, 'You do not have permission to modify the default or hidden roles.')
+                logger.warning(
+                    message.author.name + ' tried to set default, hidden or forbidden roles without permission!')
+                await client.send_message(message.channel,
+                                          'You do not have permission to modify the default or hidden roles.')
                 return None
             logger.info(message.author.name + ' wants to manage default or hidden roles.')
             if command[1] == 'default':
@@ -303,7 +311,8 @@ async def on_message(message):
     if message.content.lower().startswith('!card'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
-            await client.send_message(message.channel, "I can look cards up for you, honourable samurai-san, but please tell me which one.")
+            await client.send_message(message.channel,
+                                      "I can look cards up for you, honourable samurai-san, but please tell me which one.")
         else:
             await client.send_message(message.channel, cards.get_card_url(command))
     if message.content.lower().startswith('!oracle'):
@@ -315,7 +324,8 @@ async def on_message(message):
     if message.content.lower().startswith('!gencon'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
-            await client.send_message(message.channel, "Say '!gencon COMMAND'. Valid commands are: days, hours, minutes, seconds, parsecs, links")
+            await client.send_message(message.channel,
+                                      "Say '!gencon COMMAND'. Valid commands are: days, hours, minutes, seconds, parsecs, links")
         else:
             await client.send_message(message.channel, gencon.do_gencon(command))
     if message.content.lower().startswith('!reload'):
@@ -323,13 +333,16 @@ async def on_message(message):
     if message.content.lower().startswith('!report'):
         await client.send_message(message.channel, "<https://goo.gl/forms/aZw0kmvgBhyNc2sI2>")
     if message.content.lower().startswith('!stats'):
-        await client.send_message(message.channel, "<https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0HFgzxmgf9hcqIXGniaU3MU8uZjyzd2kAsrDtbHav283sWoY7Z1vc5dOlCz3OpIdwubLkAcovb7Zn/pubhtml>")
+        await client.send_message(message.channel,
+                                  "<https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0HFgzxmgf9hcqIXGniaU3MU8uZjyzd2kAsrDtbHav283sWoY7Z1vc5dOlCz3OpIdwubLkAcovb7Zn/pubhtml>")
     if message.content.lower().startswith('!wiki'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
             await client.send_message(message.channel, "Here's the wiki: https://l5r.gamepedia.com/")
         else:
-            await client.send_message(message.channel, 'https://l5r.gamepedia.com/index.php?search=' + urllib.parse.quote(' '.join(command)))
+            await client.send_message(message.channel,
+                                      'https://l5r.gamepedia.com/index.php?search=' + urllib.parse.quote(
+                                          ' '.join(command)))
     if message.content.lower().startswith('!ruling'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:

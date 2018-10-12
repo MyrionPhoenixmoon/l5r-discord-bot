@@ -47,20 +47,40 @@ def validate_card_name(card_name):
         except json.decoder.JSONDecodeError:
             db_records = {}
 
-    if db_records == {} or (datetime.datetime.strptime(db_records['last_updated'], "%Y-%m-%dT%H:%M:%S.%f") - datetime.datetime.today()).days < 0:
-        logger.info("Updating Card DB")
+    if db_records != {} and (datetime.datetime.strptime(db_records['last_updated'], '%a, %d %b %Y %H:%M:%S GMT') - datetime.datetime.today()).days < -1:
+        logger.info("Checking whether to update Card DB")
+        r = requests.get("https://api.fiveringsdb.com/cards", {'If-Modified-Since': db_records['last_updated']})
+        requested = True
+    elif db_records == {}:
+        logger.info("Getting fresh Card DB")
         r = requests.get("https://api.fiveringsdb.com/cards")
-        request_data = r.json()
+        requested = True
+    else:
+        requested = False
 
-        db_records['last_updated'] = datetime.datetime.today().isoformat()
-        card_names = {}
-        for card in request_data['records']:
-            image_url = find_image_url(card['pack_cards'])
-            card_names[card['name_canonical']] = image_url
-        db_records['cards'] = card_names
-        with open('card_db.json', 'w') as outfile:
-            json.dump(db_records, outfile)
-            logger.info('Saved new card_db to file')
+    if requested:
+        if r.status_code == 200:
+            logger.info("Card DB changed, updating now")
+            request_data = r.json()
+
+            if 'last-modified' in r.headers:
+                db_records['last_updated'] = r.headers['last-modified']
+            else:
+                db_records['last_updated'] = r.headers['date']
+            card_names = {}
+            for card in request_data['records']:
+                image_url = find_image_url(card['pack_cards'])
+                card_names[str(card['id']).replace('-', ' ')] = image_url
+            db_records['cards'] = card_names
+            with open('card_db.json', 'w') as outfile:
+                json.dump(db_records, outfile)
+                logger.info('Saved new card_db to file')
+        elif r.status_code == 304:
+            logger.info("Card DB has not been updated")
+        else:
+            logger.error("Received an unexpected status code! " + str(r.status_code))
+    else:
+        logger.info("Did not need to update Card DB")
 
     if card_name in db_records['cards']:
         logger.info("Found card in DB")
