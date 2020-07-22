@@ -355,6 +355,7 @@ async def on_message(message):
                 for embed in embeds:
                     await message.channel.send(embed=embed)
 
+
 with open('tokenfile') as f:
     token = f.read()
 client.run(token)
