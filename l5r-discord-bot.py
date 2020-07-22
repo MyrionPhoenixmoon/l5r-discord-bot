@@ -68,12 +68,12 @@ async def save_forbidden_roles_to_file():
 
 
 async def update_server_stats():
-    for server in client.servers:
+    for guild in client.guilds:
         stats = collections.Counter()
-        for member in server.members:
+        for member in guild.members:
             roles = [role.name for role in member.roles if role.name != '@everyone']
             stats.update(roles)
-        role_numbers_per_server[server.name] = stats
+        role_numbers_per_server[guild.name] = stats
         await save_stats_to_file()
 
 
@@ -119,14 +119,14 @@ async def on_ready():
 async def on_member_join(new_member):
     logger.info('A new member joined')
     try:
-        roles = default_roles[new_member.server]
+        roles = default_roles[new_member.guild]
     except KeyError:
         logger.info('But there are no default roles set up!')
         return None
     client.add_roles(new_member, roles)
     logger.info('Added new roles to ' + new_member.name)
 
-    role_numbers_per_server[new_member.server.name].update(roles)
+    role_numbers_per_server[new_member.guild.name].update(roles)
     await save_stats_to_file()
 
 
@@ -156,7 +156,7 @@ async def on_message(message):
                     "!gencon lets you count down the time until Gencon! \n" + \
                     "!wiki searches the L5R Gameapedia Wiki \n" + \
                     "!report and !stats provide links to win/loss statistics gathering and data"
-        await client.send_message(message.channel, help_text)
+        await message.channel.send(help_text)
 
     if message.content.lower().startswith('!clan') and message.content.lower() != '!clans':
         command = message.content.split(' ')[1:]
@@ -165,46 +165,46 @@ async def on_message(message):
             # All clan roles are nicely capitalized
             clan_name = command[0].lower().capitalize().strip('<>')
             try:
-                forbidden_roles[message.server.name]
+                forbidden_roles[message.guild.name]
             except KeyError:
-                forbidden_roles[message.server.name] = []
+                forbidden_roles[message.guild.name] = []
 
-            if clan_name in forbidden_roles[message.server.name]:
-                await client.send_message(message.channel, 'How presumptuous! This is not a clan one can simply ' +
+            if clan_name in forbidden_roles[message.guild.name]:
+                await message.channel.send('How presumptuous! This is not a clan one can simply ' +
                                           "join!")
             elif 'disloyal' in message.author.roles:
-                await client.send_message(message.channel, 'You have betrayed your clan too often! You may not'
+                await message.channel.send('You have betrayed your clan too often! You may not'
                                                            'join a clan at this time!')
             else:
                 logger.info('That clan is ' + clan_name)
-                role = discord.utils.find(lambda r: r.name == clan_name, message.server.roles)
+                role = discord.utils.find(lambda r: r.name == clan_name, message.guild.roles)
                 if role is None:
                     # lcgplayer and rpgplayer however, aren't, so we must cover that case as well.
-                    role = discord.utils.find(lambda r: r.name == clan_name.lower(), message.server.roles)
+                    role = discord.utils.find(lambda r: r.name == clan_name.lower(), message.guild.roles)
                 if role is not None and role not in message.author.roles:
                     try:
                         await client.add_roles(message.author, role)
-                        role_numbers_per_server[message.server.name][role.name] += 1
-                        await client.send_message(message.channel, 'Let it be known that ' + message.author.mention +
+                        role_numbers_per_server[message.guild.name][role.name] += 1
+                        await message.channel.send('Let it be known that ' + message.author.mention +
                                                   ' joined the ' + role.name + ' clan!')
                         if role.name == "Crab":
-                            await client.send_message(message.channel, '**CRAAAAAAAAB!**')
+                            await message.channel.send('**CRAAAAAAAAB!**')
                         if role.name == "Dragon":
-                            await client.send_message(message.channel, 'What makes a Dragon?')
+                            await message.channel.send('What makes a Dragon?')
                         if role.name == "Scorpion":
-                            await client.send_message(message.channel, message.author.mention + ' can swim!')
+                            await message.channel.send(message.author.mention + ' can swim!')
                         if role.name == "Phoenix":
-                            await client.send_message(message.channel, 'It has been ~~' + str(random.randint(0, 20)) +
+                            await message.channel.send('It has been ~~' + str(random.randint(0, 20)) +
                                                       '~~ 0 days since our last maho incident.')
                         if role.name == "Crane":
-                            await client.send_message(message.channel, 'A most excellent choice!')
+                            await message.channel.send('A most excellent choice!')
                         if role.name == "Unicorn":
-                            await client.send_message(message.channel, 'Hello Moto!')
+                            await message.channel.send('Hello Moto!')
                         if role.name == "Lion":
                             await client.send_message(message.channel,
                                                       'Suspect everyone of being your enemy and you will never be disappointed.')
                         if role.name == "Spider":
-                            await client.send_message(message.channel, 'Welcome to the World Wide Web!')
+                            await message.channel.send('Welcome to the World Wide Web!')
                     except discord.errors.Forbidden:
                         logger.info("Got a FORBIDDEN error while adding to the clan")
                         await client.send_message(message.channel,
@@ -213,17 +213,17 @@ async def on_message(message):
                                                   "to give it to you*")
                 elif role is not None and role in message.author.roles:
                     await client.remove_roles(message.author, role)
-                    role_numbers_per_server[message.server.name][role.name] -= 1
-                    if role_numbers_per_server[message.server.name][role.name] == 0:
-                        del (role_numbers_per_server[message.server.name][role.name])
-                    await client.send_message(message.channel, 'Let it be known that ' + message.author.mention +
+                    role_numbers_per_server[message.guild.name][role.name] -= 1
+                    if role_numbers_per_server[message.guild.name][role.name] == 0:
+                        del (role_numbers_per_server[message.guild.name][role.name])
+                    await message.channel.send('Let it be known that ' + message.author.mention +
                                               ' left the ' + role.name + ' clan!')
                 else:
                     logger.info("The clan doesn't exist")
-                    await client.send_message(message.channel, 'Unfortunately, ' + message.author.mention +
+                    await message.channel.send('Unfortunately, ' + message.author.mention +
                                               '-san, this clan is not listed in the Imperial Records...')
         elif len(command) == 2:
-            if not message.author.server_permissions.manage_server:
+            if not message.author.guild_permissions.manage_guild:
                 logger.warning(
                     message.author.name + ' tried to set default, hidden or forbidden roles without permission!')
                 await client.send_message(message.channel,
@@ -231,68 +231,68 @@ async def on_message(message):
                 return None
             logger.info(message.author.name + ' wants to manage default or hidden roles.')
             if command[1] == 'default':
-                role = discord.utils.find(lambda r: r.name == command[0], message.server.roles)
+                role = discord.utils.find(lambda r: r.name == command[0], message.guild.roles)
                 try:
-                    default_roles[message.server.name]
+                    default_roles[message.guild.name]
                 except KeyError:
-                    default_roles[message.server.name] = []
-                if role.name in default_roles[message.server.name]:
-                    default_roles[message.server.name].remove(role.name)
+                    default_roles[message.guild.name] = []
+                if role.name in default_roles[message.guild.name]:
+                    default_roles[message.guild.name].remove(role.name)
                     await save_default_roles_to_file()
-                    await client.send_message(message.channel, role.name +
+                    await message.channel.send(role.name +
                                               ' has been removed from the default roles list.')
                 else:
-                    default_roles[message.server.name].append(role.name)
+                    default_roles[message.guild.name].append(role.name)
                     await save_default_roles_to_file()
-                    await client.send_message(message.channel, role.name + ' has been added to the default roles list.')
+                    await message.channel.send(role.name + ' has been added to the default roles list.')
             if command[1] == 'hidden':
-                role = discord.utils.find(lambda r: r.name == command[0], message.server.roles)
+                role = discord.utils.find(lambda r: r.name == command[0], message.guild.roles)
                 try:
-                    hidden_roles[message.server.name]
+                    hidden_roles[message.guild.name]
                 except KeyError:
-                    hidden_roles[message.server.name] = []
-                if role.name in hidden_roles[message.server.name]:
-                    hidden_roles[message.server.name].remove(role.name)
+                    hidden_roles[message.guild.name] = []
+                if role.name in hidden_roles[message.guild.name]:
+                    hidden_roles[message.guild.name].remove(role.name)
                     await save_hidden_roles_to_file()
-                    await client.send_message(message.channel, role.name +
+                    await message.channel.send(role.name +
                                               ' has been removed from the hidden roles list.')
                 else:
-                    hidden_roles[message.server.name].append(role.name)
+                    hidden_roles[message.guild.name].append(role.name)
                     await save_hidden_roles_to_file()
                     await client.send_message(message.channel,
                                               role.name + ' has been added to the hidden roles list.')
             if command[1] == 'forbidden':
-                role = discord.utils.find(lambda r: r.name == command[0], message.server.roles)
+                role = discord.utils.find(lambda r: r.name == command[0], message.guild.roles)
                 try:
-                    forbidden_roles[message.server.name]
+                    forbidden_roles[message.guild.name]
                 except KeyError:
-                    forbidden_roles[message.server.name] = []
-                if role.name in forbidden_roles[message.server.name]:
-                    forbidden_roles[message.server.name].remove(role.name)
+                    forbidden_roles[message.guild.name] = []
+                if role.name in forbidden_roles[message.guild.name]:
+                    forbidden_roles[message.guild.name].remove(role.name)
                     await save_forbidden_roles_to_file()
-                    await client.send_message(message.channel, role.name +
+                    await message.channel.send(role.name +
                                               ' has been removed from the forbidden roles list.')
                 else:
-                    forbidden_roles[message.server.name].append(role.name)
+                    forbidden_roles[message.guild.name].append(role.name)
                     await save_forbidden_roles_to_file()
                     await client.send_message(message.channel,
                                               role.name + ' has been added to the forbidden roles list.')
             else:
-                await client.send_message(message.channel, 'That is not a request I can fulfill. Perhaps you should ' +
+                await message.channel.send('That is not a request I can fulfill. Perhaps you should ' +
                                           'ask for !help first.')
     if message.content.lower().startswith('!clans'):
-        roles = role_numbers_per_server[message.server.name]
+        roles = role_numbers_per_server[message.guild.name]
         logger.info("Displaying clan numbers")
         try:
-            hidden_roles[message.server.name]
+            hidden_roles[message.guild.name]
         except KeyError:
-            hidden_roles[message.server.name] = []
+            hidden_roles[message.guild.name] = []
         response = "```"
         for role, count in roles.items():
-            if role not in hidden_roles[message.server.name]:
+            if role not in hidden_roles[message.guild.name]:
                 response += role + ": " + str(count) + "\n"
         response += "``` \n"
-        await client.send_message(message.channel, response)
+        await message.channel.send(response)
         await update_server_stats()
     if message.content.lower().startswith('!roll'):
         command = message.content.split(' ')[1:]
@@ -314,31 +314,31 @@ async def on_message(message):
             await client.send_message(message.channel,
                                       "I can look cards up for you, honourable samurai-san, but please tell me which one.")
         else:
-            await client.send_message(message.channel, cards.get_card_url(command))
+            await message.channel.send(cards.get_card_url(command))
     if message.content.lower().startswith('!oracle'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
-            await client.send_message(message.channel, "I can look Old5r cards up for you, honourable samurai-san.")
+            await message.channel.send("I can look Old5r cards up for you, honourable samurai-san.")
         else:
-            await client.send_message(message.channel, oracle.get_card_url(command))
+            await message.channel.send(oracle.get_card_url(command))
     if message.content.lower().startswith('!gencon'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
             await client.send_message(message.channel,
                                       "Say '!gencon COMMAND'. Valid commands are: days, hours, minutes, seconds, parsecs, links")
         else:
-            await client.send_message(message.channel, gencon.do_gencon(command))
+            await message.channel.send(gencon.do_gencon(command))
     if message.content.lower().startswith('!reload'):
         await reload_from_files()
     if message.content.lower().startswith('!report'):
-        await client.send_message(message.channel, "<https://goo.gl/forms/aZw0kmvgBhyNc2sI2>")
+        await message.channel.send("<https://goo.gl/forms/aZw0kmvgBhyNc2sI2>")
     if message.content.lower().startswith('!stats'):
         await client.send_message(message.channel,
                                   "<https://docs.google.com/spreadsheets/d/e/2PACX-1vQ0HFgzxmgf9hcqIXGniaU3MU8uZjyzd2kAsrDtbHav283sWoY7Z1vc5dOlCz3OpIdwubLkAcovb7Zn/pubhtml>")
     if message.content.lower().startswith('!wiki'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
-            await client.send_message(message.channel, "Here's the wiki: https://l5r.gamepedia.com/")
+            await message.channel.send("Here's the wiki: https://l5r.gamepedia.com/")
         else:
             await client.send_message(message.channel,
                                       'https://l5r.gamepedia.com/index.php?search=' + urllib.parse.quote(
@@ -346,14 +346,15 @@ async def on_message(message):
     if message.content.lower().startswith('!ruling'):
         command = message.content.split(' ')[1:]
         if len(command) < 1:
-            await client.send_message(message.channel, "https://fiveringsdb.com/rules/reference")
+            await message.channel.send("https://fiveringsdb.com/rules/reference")
         else:
             embeds, error_message = rulings.get_rulings(command)
             if embeds is None:
-                await client.send_message(message.channel, error_message)
+                await message.channel.send(error_message)
             else:
                 for embed in embeds:
-                    await client.send_message(message.channel, embed=embed)
+                    await message.channel.send(embed=embed)
 
-
-client.run('MzY3Mzk5NzI5MzU4OTYyNjk5.DL64SQ.BCQf1etPO-PQbfgD4EAF-BSMq60')
+with open('tokenfile') as f:
+    token = f.read()
+client.run(token)
