@@ -87,8 +87,8 @@ def validate_card_name(card_name):
         return True, db_records['cards'][card_name]
 
     logger.info("Presenting alternatives")
-    potentials = process.extract(card_name, set(db_records['cards']), limit=3, scorer=fuzz.ratio)
-    if fuzz.partial_ratio(card_name, potentials[0]) >= 75:
+    potentials = process.extract(card_name, set(db_records['cards']), limit=3, scorer=fuzz.token_set_ratio)
+    if fuzz.token_set_ratio(card_name, potentials[0]) >= 75:
         logger.info("Found a good match in DB")
         logger.info("Matched " + str(card_name) + " to " + str(potentials[0][0]) + " with similarity of " + str(potentials[0][1]))
         return False, db_records['cards'][potentials[0][0]]
