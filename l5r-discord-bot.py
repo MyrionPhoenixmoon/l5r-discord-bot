@@ -173,9 +173,11 @@ async def on_message(message):
                 forbidden_roles[message.guild.name] = []
 
             if clan_name in forbidden_roles[message.guild.name]:
+                logger.info('Clan is in the forbidden roles, however.')
                 await message.channel.send('How presumptuous! This is not a clan one can simply ' +
                                            "join!")
             elif 'disloyal' in message.author.roles:
+                logger.info('They are disloyal however and thus prevented from joining.')
                 await message.channel.send('You have betrayed your clan too often! You may not'
                                            'join a clan at this time!')
             else:
@@ -187,8 +189,9 @@ async def on_message(message):
                     role = discord.utils.find(
                         lambda r: r.name == clan_name.lower(), message.guild.roles)
                 if role is not None and role not in message.author.roles:
+                    logger.info("They don't have that role yet and it exists on the server.")
                     try:
-                        await client.add_roles(message.author, role)
+                        await message.author.add_roles(role, "user requested it through the Miya Herald")
                         role_numbers_per_server[message.guild.name][role.name] += 1
                         await message.channel.send('Let it be known that ' + message.author.mention +
                                                    ' joined the ' + role.name + ' clan!')
@@ -218,7 +221,7 @@ async def on_message(message):
                             "join! *AKA you're not permitted to join this role or I'm not allowed " +
                             "to give it to you*")
                 elif role is not None and role in message.author.roles:
-                    await client.remove_roles(message.author, role)
+                    await message.authro.remove_roles(role, "user requested it through the Miya Herald")
                     role_numbers_per_server[message.guild.name][role.name] -= 1
                     if role_numbers_per_server[message.guild.name][role.name] == 0:
                         del (
