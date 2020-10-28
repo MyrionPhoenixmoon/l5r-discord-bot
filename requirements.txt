@@ -1,0 +1,4 @@
+discord.py==1.5.1
+fuzzywuzzy==0.18.0
+requests==2.24.0
+python-levenshtein==0.12.0
